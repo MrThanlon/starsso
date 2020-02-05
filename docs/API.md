@@ -39,17 +39,34 @@
 | username |  是  | String | 登录名 |
 | password |  是  | String |  密码  |
 
-####修改个人信息 - `/user/modify`
+#### 注册 - `/user/register`
+
+请求参数：
+
+|   字段名   | 必填 |  类型  |  说明  |
+| :--------: | :--: | :----: | :----: |
+|  username  |  是  | String | 登录名 |
+|  password  |  是  | String |  密码  |
+| inviteCode |  是  | Number | 邀请码 |
+
+#### 请求验证码 - `/user/getVerify`
+
+*注意：验证码仅用于修改个人信息*
+
+#### 修改个人信息 - `/user/modify`
+
+*注意：在修改之前需要请求验证码*
 
 请求参数：
 
 |   字段名    | 必填 |  类型  |               说明               |
 | :---------: | :--: | :----: | :------------------------------: |
 |  username   |  否  | String |              用户名              |
-|  password   |  否  | String |  原密码，如果需要修改密码则必填  |
-| newPassword | 同上 | String |  新密码，如果需要修改密码则必填  |
+|  password   |  是  | String |              原密码              |
+| newPassword | 同上 | String |              新密码              |
 |    email    |  否  | String |             电子邮箱             |
 |    phone    |  否  | String | 手机号，类型是String但只接受数字 |
+|   verify    |  是  | Number |              验证码              |
 
 #### 查看权限 - `/user/privilege/get`
 
@@ -80,41 +97,55 @@
 
 ### 管理 - `/admin`
 
-#### 添加系统 - `/admin/system/add`
+#### 添加系统及分配权限 - `/admin/system/add`
+
+*注意：如果有users参数，则必须使用`application/json`*
 
 请求参数：
 
-| 字段名 | 必填 | 类型 | 说明 |
-| :----: | :--: | :--: | :--: |
-|        |      |      |      |
-|        |      |      |      |
+|   字段名   | 必填 |  类型  |      说明      |
+| :--------: | :--: | :----: | :------------: |
+| systemName |  是  | String |    系统名称    |
+|    URL     |  是  | String |    系统名称    |
+|   users    |  否  | Array  | 授权的用户列表 |
 
-#### 修改系统 - `/admin/system/modify`
+返回数据：
+
+|  字段名  | 必填 |  类型  |  说明  |
+| :------: | :--: | :----: | :----: |
+| systemID |  是  | Number | 系统ID |
+
+#### 修改系统及分配权限 - `/admin/system/modify`
+
+*注意：如果有users参数，则必须使用`application/json`*
 
 请求参数：
 
-| 字段名 | 必填 | 类型 | 说明 |
-| :----: | :--: | :--: | :--: |
-|        |      |      |      |
-|        |      |      |      |
+|   字段名   | 必填 |  类型  |      说明      |
+| :--------: | :--: | :----: | :------------: |
+|  systemID  |  是  | Number |     系统ID     |
+| systemName |  否  | String |    系统名称    |
+|    URL     |  否  | String |    系统链接    |
+|   users    |  否  | Array  | 授权的用户列表 |
 
 #### 删除系统 - `/admin/system/delete`
 
 请求参数：
 
-| 字段名 | 必填 | 类型 | 说明 |
-| :----: | :--: | :--: | :--: |
-|        |      |      |      |
-|        |      |      |      |
+|  字段名  | 必填 |  类型  |  说明  |
+| :------: | :--: | :----: | :----: |
+| systemID |  是  | Number | 系统ID |
 
 #### 查看系统权限分配 - `/admin/system/get`
 
 *注意：返回的数据是一个数组，每个元素的字段如下：*
 
-| 字段名 | 必填 | 类型 | 说明 |
-| :----: | :--: | :--: | :--: |
-|        |      |      |      |
-|        |      |      |      |
+|   字段名   | 必填 |  类型  |          说明          |
+| :--------: | :--: | :----: | :--------------------: |
+|  systemID  |  是  | Number |         系统ID         |
+| systemName |  是  | String |        系统名称        |
+|    URL     |  是  | String |        系统链接        |
+|   users    |  是  | Array  | 用户列表，元素为登录名 |
 
 返回示例：
 
@@ -124,10 +155,19 @@
   "msg": "ok",
   "data": [
     {
-      
+      "systemID": 127,
+      "systemName": "VPN",
+      "URL": "https://vpn.starstudio.org/"
+      "users": [
+        "abc@example.com",
+        "efg@example.com"
+      ]
     },
     {
-      
+      "systemID": 176,
+      "systemName": "Graylog",
+      "URL": "http://graylog.starstudio.org/",
+      "users":[]
     },
     ...
   ]
@@ -138,16 +178,29 @@
 
 请求参数：
 
-| 字段名 | 必填 | 类型 | 说明 |
-| :----: | :--: | :--: | :--: |
-|        |      |      |      |
-|        |      |      |      |
+| 字段名 | 必填 |  类型  |   说明   |
+| :----: | :--: | :----: | :------: |
+| email  |  否  | String | 电子邮箱 |
+| phone  |  否  | String |  手机号  |
+
+*注意：邮箱和手机号只填写一个，会发送邀请码和邀请链接*
 
 #### 删除用户 - `/admin/user/delete`
 
 请求参数：
 
-| 字段名 | 必填 | 类型 | 说明 |
-| :----: | :--: | :--: | :--: |
-|        |      |      |      |
-|        |      |      |      |
+|  字段名  | 必填 |  类型  |  说明  |
+| :------: | :--: | :----: | :----: |
+| username |  是  | String | 登录名 |
+
+#### 修改用户信息 - `/admin/user/modify`
+
+请求参数：
+
+|  字段名  | 必填 |  类型  |   说明   |
+| :------: | :--: | :----: | :------: |
+| username |  是  | String |  登录名  |
+| password |  否  | String |   密码   |
+|  email   |  否  | String | 电子邮箱 |
+|  phone   |  否  | String |  手机号  |
+
