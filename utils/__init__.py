@@ -1,6 +1,7 @@
 from flask import Blueprint
 
 
+# see https://github.com/pallets/flask/issues/593
 class EnhancedBlueprint(Blueprint):
     def register_blueprint(self, blueprint, **options):
         def deferred(state):
