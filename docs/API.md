@@ -54,7 +54,7 @@
 |  password  |  是  | String |  密码  |
 | inviteCode |  是  | Number | 邀请码 |
 
-#### 请求验证码 - `/user/getVerify`
+#### 请求验证码 - `/user/validationCode`
 
 *注意：验证码仅用于修改个人信息*
 
@@ -63,7 +63,7 @@
 | email  |  是  | Boolean | 是否通过电子邮件发送 |
 | phone  |  是  | Boolean |   是否通过短信发送   |
 
-#### 修改个人信息 - `/user/modify`
+#### 修改个人信息 - `/user/profile/modify`
 
 *注意：在修改之前需要请求验证码*
 
@@ -78,7 +78,7 @@
 |    phone    |  否  | String | 手机号，类型是String但只接受数字 |
 |   verify    |  是  | Number |              验证码              |
 
-#### 查看权限 - `/user/privilege/get`
+#### 查看权限 - `/user/permission`
 
 *注意：返回的数据是一个数组，每个元素的字段如下：*
 
