@@ -54,7 +54,7 @@
 |  password  |  是  | String |  密码  |
 | inviteCode |  是  | Number | 邀请码 |
 
-#### 请求验证码 - `/user/validation_code`
+#### 请求验证码 - `/user/validationCode`
 
 *注意：验证码仅用于修改个人信息*
 
