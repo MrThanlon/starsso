@@ -4,14 +4,17 @@ from flask import Blueprint
 
 bp = Blueprint('auth_api', __name__)
 
-@bp.route("/login", methods=('POST',))
+
+@bp.route("/login", methods=('POST', 'GET'))
 def login():
-    pass
+    return 0
 
-@bp.route("/validation_code", methods=('POST',))
+
+@bp.route("/validationCode", methods=('POST', 'GET'))
 def validation_code():
-    pass
+    return {'hello': 'world'}
 
-@bp.route("/register", methods=('POST',))
+
+@bp.route("/register", methods=('POST', 'GET'))
 def register():
-    pass
+    return 0
