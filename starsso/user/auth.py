@@ -17,4 +17,4 @@ def validation_code():
 
 @bp.route("/register", methods=('POST', 'GET'))
 def register():
-    return 0
+    return -1

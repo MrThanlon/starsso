@@ -20,7 +20,7 @@ class APIResponse(Response):
         if isinstance(response, (list, dict)):
             # return with data
             body['data'] = response
-        elif isinstance(response, int) and response < 0:
+        elif isinstance(response, int):
             # return with error code
             body['code'] = response
         else:
