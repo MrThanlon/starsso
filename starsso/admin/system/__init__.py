@@ -1,3 +1,4 @@
 from flask import Blueprint
 
-bp = Blueprint('system', __name__, url_prefix='/system')
+# for avoid same name ;)
+bp = Blueprint('systemd', __name__, url_prefix='/system')

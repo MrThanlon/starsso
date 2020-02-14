@@ -6,6 +6,7 @@ from .auth import bp as auth_bp
 from .profile import bp as profile_bp
 from .permission import bp as permission_bp
 
+
 def register(app, url_prefix):
     # auth api.
     app.register_blueprint(auth_bp, url_prefix=url_prefix)
