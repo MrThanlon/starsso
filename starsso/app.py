@@ -1,6 +1,6 @@
 # coding: utf-8
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, abort, g
 
 import utils
 import config
@@ -17,7 +17,8 @@ def get_wsgi_application():
 
     @app.before_request
     def before_request():
-        request.parse()
+        if not request.parse():
+            return -1
 
     user_routes.register(app, url_prefix="/user")
     admin_routes.register(app, url_prefix="/admin")

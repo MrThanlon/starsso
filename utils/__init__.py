@@ -68,7 +68,7 @@ class APIRequest(Request):
                 # FIXME: file content
                 self.body = self.form
                 if self.files:
-                    pass
+                    return False
             else:
                 return False
             return True
