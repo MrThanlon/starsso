@@ -1,13 +1,13 @@
 # coding: utf-8
 
-from flask import Blueprint
+from flask import Blueprint, request, session, g
 
 bp = Blueprint('auth_api', __name__)
 
 
 @bp.route("/login", methods=('POST', 'GET'))
 def login():
-    return 0
+    return request.body
 
 
 @bp.route("/validationCode", methods=('POST', 'GET'))

@@ -44,6 +44,8 @@
 | username |  是  | String | 登录名 |
 | password |  是  | String |  密码  |
 
+#### 登出 - `/user/logout`
+
 #### 注册 - `/user/register`
 
 请求参数：
