@@ -12,7 +12,7 @@ bp = Blueprint('auth_api', __name__)
 @bp.route("/login", methods=('POST', 'GET'))
 @utils.check_param
 def login():
-    # verify username
+    # TODO: verify username and password
     username = request.body['username']
     password = request.body['password']
     # set session
