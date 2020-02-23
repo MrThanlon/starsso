@@ -19,6 +19,8 @@ def login():
     session['login'] = True
     session['username'] = request.body['username']
     session['born'] = time.time()
+    # save session to database
+    pass
     return 0
 
 

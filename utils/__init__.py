@@ -4,6 +4,7 @@
     session中保存的信息有
     - login: 是否登录
     - born: 生日
+    - username: 登录名
     - code: 验证码（如果有）
 """
 from flask import jsonify, Response, Request, session
