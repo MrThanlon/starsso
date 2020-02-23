@@ -1,11 +1,19 @@
 # coding: utf-8
-from flask import jsonify, Response, Request
+"""
+关于session：
+    session中保存的信息有
+    - login: 是否登录
+    - born: 生日
+    - code: 验证码（如果有）
+"""
+from flask import jsonify, Response, Request, session
 
 """
 Error message
 """
 errorMessage = {
     0: 'ok',
+    -2: 'logged',
     -1: 'bad request params',
     -11: 'wrong invite code',
     -23: 'repeated name',
@@ -79,3 +87,35 @@ class APIRequest(Request):
 class JWT:
     def __init__(self, username):
         self.username = username
+
+
+def check_param(f):
+    """
+    Return -1 if missing param.
+    FIXME: with param list
+    :param f: function
+    :return: wrapped
+    """
+
+    def wrapped():
+        try:
+            return f()
+        except KeyError:
+            return -1
+
+    return wrapped
+
+
+def check_login(f):
+    """
+    Return -33 if not logged.
+    :param f:
+    :return:
+    """
+
+    def wrapped():
+        if 'login' not in session:
+            return -33
+        return f()
+
+    return wrapped
