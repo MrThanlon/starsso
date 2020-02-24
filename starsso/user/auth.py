@@ -41,21 +41,25 @@ class Login(MethodView):
         '''
             Login.post provided sso web login API.
         '''
-        if self.logined:
-            return make_api_response(code=ALREADY_LOGINED)
-        
         req = Login.LoginForm(request.form)
         if not req.validate():
             return make_api_response(code=INVALID_REQUEST), 400
+        username, password = req.username.data, req.password.data
+        
+        if self.logined:
+            current_app.logger.info('deny login request with user "{}" for existing session of user "{}"'.format(username, self.current_user))
+            return make_api_response(code=ALREADY_LOGINED)
         
         # search user to bind.
         l = current_app.get_ldap_connection()
         user_entries = l.search_s(current_app.ldap_search_base,
                  ldap.SCOPE_SUBTREE,
-                 current_app.ldap_search_pattern.format(username=req.username.data))
+                 current_app.ldap_search_pattern.format(username=username))
         if not user_entries: # user not found
+            current_app.logger.info('deny login request with username "{}". username not found.'.format(username))
             return make_api_response(code=INVALID_USER)
         if len(user_entries) > 1: # ambigous username. not allow to login.
+            current_app.logger.warn('ambigous username "{}". login request is deined.'.format(username))
             return make_api_response(code=INVALID_USER,
                                      msg="Duplicated users found. The users are blocked for security reason. Consult administrator to get help.")
         user_entry = user_entries[0]
@@ -63,14 +67,16 @@ class Login(MethodView):
         # re-bind according to user dn.
         user_dn = user_entry[0]
         try:
-            l.simple_bind_s(user_dn, req.password.data)
+            l.simple_bind_s(user_dn, password)
         except ldap.INVALID_CREDENTIALS:
+            current_app.logger.info('login with username {}. invalid password.'.format(username))
             return make_api_response(code=INVALID_USER)
         
         # valid account. register session.
-        session['username'] = req.username.data
+        session['username'] = username
+        current_app.logger.info('user "{}" logined. (ldap dn: {})'.format(username, user_dn))
         
-        return make_api_response(code=OK, data={'user': req.username.data})
+        return make_api_response(code=OK, data={'user': username})
         
 bp.add_url_rule('/login', view_func=Login.as_view("login"))
 

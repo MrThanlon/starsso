@@ -7,6 +7,7 @@ from .utils import APIResponse, APIRequest
 import ldap
 import weakref
 import os
+import logging
 
 from .admin import routes as admin_routes
 from .user import routes as user_routes
@@ -16,6 +17,7 @@ def register_services(app):
         register_services() inserts common service methods.
     '''
     
+    # LDAP
     def get_ldap_connection():
         '''
             establish new ldap connection.
@@ -24,8 +26,21 @@ def register_services(app):
         l.simple_bind_s(app.ldap_root_bind_dn, app.ldap_password)
         weakref.finalize(l, l.unbind_s) # prevent connection leaks.
         return l
-    
     app.get_ldap_connection = get_ldap_connection
+    
+    # Log
+    log_driver_type = app.config.get('LOG_STORAGE_DRIVER', 'file')
+    if log_driver_type == 'file':
+        log_file_name = app.config.get('LOG_STORAGE_FILE_NAME', 'starsso.log')
+        file_handler = logging.FileHandler(filename=log_file_name)
+        file_handler.setFormatter(
+            logging.Formatter("[%(asctime)s] %(levelname)s in %(module)s: %(message)s")
+        )
+        app.logger.addHandler(file_handler)
+        if app.debug:
+            file_handler.setLevel(logging.DEBUG)
+        else:
+            file_handler.setLevel(logging.INFO)
     
 
 def register_routes(app):
@@ -35,7 +50,8 @@ def register_routes(app):
     
 def load_configuration(app):
     # session
-    app.config.from_pyfile(os.environ.get('STARSSO_CONFIG_FILE', './config.py'))
+    config_file = os.path.abspath(os.environ.get('STARSSO_CONFIG_FILE', 'config.py'))
+    app.config.from_pyfile(filename=config_file)
     app.secret_key = app.config.get('SECRET_KEY', '')
     if not app.secret_key:
         raise "SECRET_KEY is missing."
