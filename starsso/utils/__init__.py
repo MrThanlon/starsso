@@ -9,6 +9,8 @@
 """
 from flask import jsonify, Response, Request, session
 
+import functools
+
 """
 Error message
 """
@@ -97,7 +99,8 @@ def check_param(f):
     :param f: function
     :return: wrapped
     """
-
+    
+    @functools.wraps(f)
     def wrapped():
         try:
             return f()
@@ -113,7 +116,8 @@ def check_login(f):
     :param f:
     :return:
     """
-
+    
+    @functools.wraps(f)
     def wrapped():
         if 'login' not in session:
             return -33

@@ -2,15 +2,16 @@
 
 from flask import Blueprint, request, session
 
-import utils
+from starsso.utils import check_param, check_login
+
 import config
 
 bp = Blueprint('profile_api', __name__)
 
 
 @bp.route("/profile/modify", methods=('GET', 'POST'))
-@utils.check_param
-@utils.check_login
+@check_param
+@check_login
 def profile_modify():
     # check validation
     if session['code'] != request.body['verify']:
@@ -30,8 +31,8 @@ def profile_modify():
 
 
 @bp.route("/profile", methods=('GET', 'POST'))
-@utils.check_param
-@utils.check_login
+@check_param
+@check_login
 def profile():
     return {
         'username': session['username'],
