@@ -43,7 +43,10 @@ class APIResponse(Response):
         :return: a response object.
         """
         body = {'code': 0}
-        if isinstance(response, (list, dict)):
+        if isinstance(response, tuple):
+            # return ERROR_CODE with custom message
+            body['code'], body['msg'] = response
+        elif isinstance(response, (list, dict)):
             # return with data
             body['data'] = response
         elif isinstance(response, int):
@@ -53,14 +56,15 @@ class APIResponse(Response):
             # error type
             body['code'] = -100
 
-        try:
-            body['msg'] = ERROR_MESSAGES[body['code']]
-        except KeyError:
-            body['code'] = -100
-        finally:
-            body['msg'] = ERROR_MESSAGES[body['code']]
-        response = jsonify(body)
-        return super(Response, cls).force_type(response, environ)
+        if 'msg' not in body:
+            try:
+                body['msg'] = ERROR_MESSAGES[body['code']]
+            except KeyError:
+                # TODO: logger, unknown code
+                body['code'] = -100
+            finally:
+                body['msg'] = ERROR_MESSAGES[body['code']]
+        return super(Response, cls).force_type(jsonify(body), environ)
 
 
 class APIRequest(Request):
@@ -105,7 +109,7 @@ def check_param(f):
     :param f: function
     :return: wrapped
     """
-    
+
     @functools.wraps(f)
     def wrapped():
         try:
@@ -122,7 +126,7 @@ def check_login(f):
     :param f:
     :return:
     """
-    
+
     @functools.wraps(f)
     def wrapped():
         if 'login' not in session:

@@ -35,8 +35,7 @@ def login():
         return INVALID_USER
     if len(user_entries) > 1:  # ambigous username. not allow to login.
         current_app.logger.warn('ambigous username "{}". login request is deined.'.format(username))
-        # FIXME: Duplicated users found. The users are blocked for security reason. Consult administrator to get help.
-        return INVALID_USER
+        return INVALID_USER, 'Duplicated users found. The users are blocked for security reason. Consult administrator to get help.'
     user_entry = user_entries[0]
 
     # re-bind according to user dn.
