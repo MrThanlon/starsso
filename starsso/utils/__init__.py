@@ -3,7 +3,7 @@
 关于session：
     session中保存的信息有
     - login: 是否登录
-    - born: 生日
+    - born: session生成时间
     - username: 登录名
     - code: 验证码（如果有）
 """
@@ -14,15 +14,21 @@ import functools
 """
 Error message
 """
-errorMessage = {
-    0: 'ok',
-    -2: 'logged',
-    -1: 'bad request params',
+OK = 0
+INVALID_REQUEST = -1
+INVALID_USER = -37
+ALREADY_LOGINED = -2
+
+ERROR_MESSAGES = {
+    OK: 'ok',
+    INVALID_REQUEST: 'bad request params',
+    INVALID_USER: 'wrong name or password',
+    ALREADY_LOGINED: 'logged',
+
     -11: 'wrong invite code',
     -23: 'repeated name',
     -30: 'wrong validation code',
     -33: 'expired cookie',
-    -37: 'wrong name or password',
     -100: 'unknown error'
 }
 
@@ -48,11 +54,11 @@ class APIResponse(Response):
             body['code'] = -100
 
         try:
-            body['msg'] = errorMessage[body['code']]
+            body['msg'] = ERROR_MESSAGES[body['code']]
         except KeyError:
             body['code'] = -100
         finally:
-            body['msg'] = errorMessage[body['code']]
+            body['msg'] = ERROR_MESSAGES[body['code']]
         response = jsonify(body)
         return super(Response, cls).force_type(response, environ)
 
