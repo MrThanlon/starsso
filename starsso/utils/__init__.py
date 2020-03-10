@@ -3,25 +3,36 @@
 关于session：
     session中保存的信息有
     - login: 是否登录
-    - born: 生日
+    - born: session生成时间
     - username: 登录名
     - code: 验证码（如果有）
 """
 from flask import jsonify, Response, Request, session
 
+import functools
+
 """
 Error message
 """
-errorMessage = {
-    0: 'ok',
-    -2: 'logged',
-    -1: 'bad request params',
+OK = 0
+INVALID_REQUEST = -1
+INVALID_USER = -37
+ALREADY_LOGINED = -2
+SMS_FAILED = -40
+UNKNOWN_ERROR = -100
+
+ERROR_MESSAGES = {
+    OK: 'ok',
+    INVALID_REQUEST: 'bad request params',
+    INVALID_USER: 'wrong name or password',
+    ALREADY_LOGINED: 'logged',
+
     -11: 'wrong invite code',
     -23: 'repeated name',
     -30: 'wrong validation code',
     -33: 'expired cookie',
-    -37: 'wrong name or password',
-    -100: 'unknown error'
+    SMS_FAILED: 'failed to send sms',
+    UNKNOWN_ERROR: 'unknown error'
 }
 
 
@@ -35,7 +46,10 @@ class APIResponse(Response):
         :return: a response object.
         """
         body = {'code': 0}
-        if isinstance(response, (list, dict)):
+        if isinstance(response, tuple):
+            # return ERROR_CODE with custom message
+            body['code'], body['msg'] = response
+        elif isinstance(response, (list, dict)):
             # return with data
             body['data'] = response
         elif isinstance(response, int):
@@ -45,14 +59,15 @@ class APIResponse(Response):
             # error type
             body['code'] = -100
 
-        try:
-            body['msg'] = errorMessage[body['code']]
-        except KeyError:
-            body['code'] = -100
-        finally:
-            body['msg'] = errorMessage[body['code']]
-        response = jsonify(body)
-        return super(Response, cls).force_type(response, environ)
+        if 'msg' not in body:
+            try:
+                body['msg'] = ERROR_MESSAGES[body['code']]
+            except KeyError:
+                # TODO: logger, unknown code
+                body['code'] = -100
+            finally:
+                body['msg'] = ERROR_MESSAGES[body['code']]
+        return super(Response, cls).force_type(jsonify(body), environ)
 
 
 class APIRequest(Request):
@@ -98,6 +113,7 @@ def check_param(f):
     :return: wrapped
     """
 
+    @functools.wraps(f)
     def wrapped():
         try:
             return f()
@@ -114,9 +130,14 @@ def check_login(f):
     :return:
     """
 
+    @functools.wraps(f)
     def wrapped():
         if 'login' not in session:
             return -33
         return f()
 
     return wrapped
+
+
+def send_sms(phone):
+    return True

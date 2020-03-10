@@ -2,12 +2,11 @@
 
 from flask import Blueprint
 
-import utils
+from starsso.utils import check_login
 
 bp = Blueprint('user_permission_api', __name__)
 
-
 @bp.route("/", methods=('GET', 'POST'))
-@utils.check_login
+@check_login
 def profile_modify():
     return []
