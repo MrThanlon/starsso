@@ -18,6 +18,8 @@ OK = 0
 INVALID_REQUEST = -1
 INVALID_USER = -37
 ALREADY_LOGINED = -2
+SMS_FAILED = -40
+UNKNOWN_ERROR = -100
 
 ERROR_MESSAGES = {
     OK: 'ok',
@@ -29,7 +31,8 @@ ERROR_MESSAGES = {
     -23: 'repeated name',
     -30: 'wrong validation code',
     -33: 'expired cookie',
-    -100: 'unknown error'
+    SMS_FAILED: 'failed to send sms',
+    UNKNOWN_ERROR: 'unknown error'
 }
 
 
@@ -134,3 +137,7 @@ def check_login(f):
         return f()
 
     return wrapped
+
+
+def send_sms(phone):
+    return True
