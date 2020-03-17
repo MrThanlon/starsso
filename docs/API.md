@@ -30,6 +30,8 @@
 |  -30   |     验证码错误     |
 |  -33   | 未登录或cookie过期 |
 |  -37   |  登录名或密码错误  |
+|  -40   |    短信无法发送    |
+|  -42   |   用户名已被注册   |
 |  -100  |    后端未知错误    |
 
 ## 接口
@@ -51,11 +53,12 @@
 
 请求参数：
 
-|   字段名   | 必填 |  类型  |  说明  |
-| :--------: | :--: | :----: | :----: |
-|  username  |  是  | String | 登录名 |
-|  password  |  是  | String |  密码  |
-| inviteCode |  是  | Number | 邀请码 |
+|   字段名   | 必填 |  类型  |      说明      |
+| :--------: | :--: | :----: | :------------: |
+|  username  |  是  | String |     登录名     |
+|  password  |  是  | String |      密码      |
+|   email    |  是  | String | 注册的电子邮箱 |
+| inviteCode |  是  | String |     邀请码     |
 
 #### 查看个人信息 - `/user/profile`
 
@@ -84,9 +87,8 @@
 
 |   字段名    | 必填 |  类型  |               说明               |
 | :---------: | :--: | :----: | :------------------------------: |
-|  username   |  否  | String |              用户名              |
 |  password   |  是  | String |              原密码              |
-| newPassword | 同上 | String |              新密码              |
+| newPassword |  否  | String |              新密码              |
 |    email    |  否  | String |             电子邮箱             |
 |    phone    |  否  | String | 手机号，类型是String但只接受数字 |
 |   verify    |  是  | Number |              验证码              |

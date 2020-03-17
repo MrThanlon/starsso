@@ -1,6 +1,8 @@
 # coding: utf-8
 
-from flask import Flask, jsonify, request, abort, g
+from flask import Flask, jsonify, request, abort, g, session
+
+from datetime import timedelta
 
 from .utils import APIResponse, APIRequest
 
@@ -8,6 +10,8 @@ import ldap
 import weakref
 import os
 import logging
+
+import config
 
 from .admin import routes as admin_routes
 from .user import routes as user_routes
@@ -76,6 +80,9 @@ def load_configuration(app):
     # ???? wtf
     app.response_class = APIResponse
     app.request_class = APIRequest
+
+    session.permanent = True
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(seconds=config.session_expiration)
 
 
 def get_wsgi_application():

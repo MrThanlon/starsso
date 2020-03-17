@@ -7,6 +7,7 @@
     - username: 登录名
     - code: 验证码（如果有）
 """
+import config
 from flask import jsonify, Response, Request, session
 
 import functools
@@ -19,6 +20,7 @@ INVALID_REQUEST = -1
 INVALID_USER = -37
 ALREADY_LOGINED = -2
 SMS_FAILED = -40
+DUPLICATED_USERNAME = -42
 UNKNOWN_ERROR = -100
 
 ERROR_MESSAGES = {
@@ -32,6 +34,7 @@ ERROR_MESSAGES = {
     -30: 'wrong validation code',
     -33: 'expired cookie',
     SMS_FAILED: 'failed to send sms',
+    DUPLICATED_USERNAME: 'duplicated username',
     UNKNOWN_ERROR: 'unknown error'
 }
 

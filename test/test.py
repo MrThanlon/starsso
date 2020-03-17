@@ -1,18 +1,32 @@
 # author: hzy
-i = input().split(' ')
-L, M = int(i[0]), int(i[1])
-order = list(range(L + 1))
-for ii in range(M):
-    i2 = input().split(' ')
-    left, right = int(i2[0]), int(i2[1])
-    if left > right:
-        tmp = left
-        left = right
-        right = tmp
+while True:
+    N = int(input())
+    if N == 0:
+        break
 
-    # remove form order
-    for iii in range(left, right+1):
-        if iii in order:
-            order.remove(iii)
+    t1 = []
+    t2 = []
+    t1_score = 0
+    t2_score = 0
+    rounds = int(N / 2) + 1 if N & 1 else int(N / 2)
+    for i in range(1, N + 1):
+        s = input()
+        sp = s.split(' ')
+        ans = 0 if sp[len(sp) - 2] == 'no' else 1
+        if s == 'no good':
+            ans = 1
+        if i % 2:
+            # t1
+            t1.append('O' if ans else 'X')
+            t1_score += ans
+        else:
+            # t2
+            t2.append('O' if ans else 'X')
+            t2_score += ans
 
-print(len(order))
+    print(' '.join(str(x) for x in list(range(1, rounds + 1))), 'Score')
+    print(' '.join(t1), t1_score)
+    if N & 1:
+        print(' '.join(t2), '-', t2_score)
+    else:
+        print(' '.join(t2), t2_score)
