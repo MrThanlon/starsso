@@ -135,6 +135,7 @@ def register():
     user_dn = 'cn={},'.format(username) + config.LDAP_SEARCH_BASE
     # register
     # TODO: add an entry
+    l.add_s(user_dn)
     pass
     # set session
     # FIXME: Reused
