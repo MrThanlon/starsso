@@ -24,7 +24,7 @@ while True:
             t2.append('O' if ans else 'X')
             t2_score += ans
 
-    print(' '.join(str(x) for x in list(range(1, rounds + 1))), 'Score')
+    print(' '.join(str(x) for x in range(1, rounds + 1)), 'Score')
     print(' '.join(t1), t1_score)
     if N & 1:
         print(' '.join(t2), '-', t2_score)
