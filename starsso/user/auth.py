@@ -9,7 +9,7 @@ from flask import Blueprint, request, session, g, jsonify, current_app
 from flask.views import MethodView
 from wtforms import Form, StringField, validators
 
-from starsso.utils import check_param, check_login, UNKNOWN_ERROR, send_sms, SMS_FAILED, DUPLICATED_USERNAME
+from starsso.utils import check_param, check_login, UNKNOWN_ERROR, send_sms, SMS_FAILED, DUPLICATED_USERNAME, send_email
 from starsso.common.response import make_api_response, OK, INVALID_REQUEST, INVALID_USER, ALREADY_LOGINED
 
 bp = Blueprint('auth_api', __name__)
@@ -94,9 +94,12 @@ def validation_code():
     attrs = user_entry[1]
     if request.body['email']:
         # query email
-        pass
+        if not send_email(attrs['email'], code):
+            current_app.logger.warn(
+                'Failed to send email, {}, check configuration.'.format(attrs['email']))
+            return SMS_FAILED
     elif request.body['phone']:
-        if not send_sms(attrs['telephoneNumber']):
+        if not send_sms(attrs['telephoneNumber'], code):
             current_app.logger.warn(
                 'Failed to send SMS, phone: {}, check configuration.'.format(attrs['telephoneNumber']))
             return SMS_FAILED
@@ -134,9 +137,9 @@ def register():
     # FIXME: escape string
     user_dn = 'cn={},'.format(username) + config.LDAP_SEARCH_BASE
     # register
-    # TODO: add an entry
-    l.add_s(user_dn)
-    pass
+    # TODO: add an entry, with telephone number
+    l.add_s(user_dn, [('objectClass', [b'organizationalPerson', b'person', b'starstudioMember', b'top']),
+                      ('email', bytes(email.encode('utf-8')))])
     # set session
     # FIXME: Reused
     session['username'] = username

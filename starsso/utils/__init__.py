@@ -142,5 +142,9 @@ def check_login(f):
     return wrapped
 
 
-def send_sms(phone):
+def send_sms(phone, code):
+    return True
+
+
+def send_email(email, code):
     return True

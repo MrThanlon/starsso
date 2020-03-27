@@ -16,7 +16,6 @@ bp = Blueprint('profile_api', __name__)
 @check_param
 @check_login
 def profile_modify():
-    # TODO: change entry
     username = session['username']
     password = request.body['password']
     new_password = request.body.get('newPassword')
@@ -46,6 +45,17 @@ def profile_modify():
     except ldap.INVALID_CREDENTIALS:
         current_app.logger.info('login with username {}. invalid password.'.format(username))
         return INVALID_USER
+
+    # TODO: generate modlist, modify entries, catch exception
+    modlist = []
+    if email:
+        modlist.append(('email', email.encode('utf-8')))
+    if phone:
+        modlist.append(('telephoneNumber', phone.encode('utf-8')))
+    l.modify_s(user_dn, modlist)
+    if new_password:
+        l.passwd_s(user_dn, None, new_password.encode('utf-8'))
+
     return OK
 
 

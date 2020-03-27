@@ -29,5 +29,7 @@ def permission():
 
     user_entry = user_entries[0]
     attrs = user_entry[1]
-    # TODO: get the list of permission
-    return OK
+    ans = attrs.get('permissionRoleName')
+    if not ans:
+        ans = []
+    return ans
