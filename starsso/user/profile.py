@@ -3,6 +3,7 @@
 from flask import Blueprint, request, session, current_app
 
 import ldap
+import ldap.filter
 
 from starsso.utils import check_param, check_login, UNKNOWN_ERROR, send_sms, SMS_FAILED, DUPLICATED_USERNAME, \
     INVALID_USER, OK
@@ -29,7 +30,8 @@ def profile_modify():
     l = current_app.get_ldap_connection()
     user_entries = l.search_s(current_app.ldap_search_base,
                               ldap.SCOPE_SUBTREE,
-                              current_app.ldap_search_pattern.format(username=username))
+                              ldap.filter.escape_filter_chars(
+                                  current_app.ldap_search_pattern.format(username=username)))
     if not user_entries:  # impossible?
         current_app.logger.info('deny modify request with username "{}". username not found.'.format(username))
         return INVALID_USER
@@ -67,7 +69,8 @@ def profile():
     l = current_app.get_ldap_connection()
     user_entries = l.search_s(current_app.ldap_search_base,
                               ldap.SCOPE_SUBTREE,
-                              current_app.ldap_search_pattern.format(username=username))
+                              ldap.filter.escape_filter_chars(
+                                  current_app.ldap_search_pattern.format(username=username)))
     if not user_entries:  # impossible?
         current_app.logger.warn('username {} not found, fatal error.'.format(username))
         return UNKNOWN_ERROR

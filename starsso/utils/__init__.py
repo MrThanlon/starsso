@@ -8,6 +8,9 @@
     - code: 验证码（如果有）
 """
 import config
+import smtplib
+from email.mime.text import MIMEText
+from email.header import Header
 from flask import jsonify, Response, Request, session
 
 import functools
@@ -21,6 +24,7 @@ INVALID_USER = -37
 ALREADY_LOGINED = -2
 SMS_FAILED = -40
 DUPLICATED_USERNAME = -42
+NOT_ADMIN = -51
 UNKNOWN_ERROR = -100
 
 ERROR_MESSAGES = {
@@ -35,6 +39,7 @@ ERROR_MESSAGES = {
     -33: 'expired cookie',
     SMS_FAILED: 'failed to send sms',
     DUPLICATED_USERNAME: 'duplicated username',
+    NOT_ADMIN: 'not admin',
     UNKNOWN_ERROR: 'unknown error'
 }
 
@@ -103,11 +108,6 @@ class APIRequest(Request):
             return False
 
 
-class JWT:
-    def __init__(self, username):
-        self.username = username
-
-
 def check_param(f):
     """
     Return -1 if missing param.
@@ -142,9 +142,39 @@ def check_login(f):
     return wrapped
 
 
-def send_sms(phone, code):
-    return True
+def check_admin(f):
+    """
+    Return -51 if not admin.
+    :param f:
+    :return:
+    """
+
+    @functools.wraps(f)
+    def wrapped():
+        if 'admin' not in session:
+            return NOT_ADMIN
+        return f()
+
+    return wrapped
 
 
-def send_email(email, code):
+def send_sms(phone, code, user):
+    # TODO: SMS
+    return False
+
+
+def send_email(email, code, user):
+    receivers = [email]
+    message = MIMEText('{}'.format(code), 'plain', 'utf-8')
+    message['From'] = Header("StarSSO", 'utf-8')
+    message['To'] = Header(user, 'utf-8')
+    message['Subject'] = Header('[StarSSO] Validation Code', 'utf-8')
+    try:
+        smtp = smtplib.SMTP()
+        # FIXME: use SSL, not port 25?
+        smtp.connect(config.SMTP_HOST, 25)
+        smtp.login(config.SMTP_USER, config.SMTP_PASS)
+        smtp.sendmail(config.SMTP_SENDER, receivers, message.as_string())
+    except smtplib.SMTPException:
+        return False
     return True

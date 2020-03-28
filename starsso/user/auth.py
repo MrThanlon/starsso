@@ -1,6 +1,7 @@
 # coding: utf-8
 import random
 import ldap
+import ldap.filter
 import time
 import jwt
 import config
@@ -32,7 +33,8 @@ def login():
     l = current_app.get_ldap_connection()
     user_entries = l.search_s(current_app.ldap_search_base,
                               ldap.SCOPE_SUBTREE,
-                              current_app.ldap_search_pattern.format(username=username))
+                              ldap.filter.escape_filter_chars(
+                                  current_app.ldap_search_pattern.format(username=username)))
     if not user_entries:  # user not found
         current_app.logger.info('deny login request with username "{}". username not found.'.format(username))
         return INVALID_USER
@@ -43,6 +45,7 @@ def login():
 
     # re-bind according to user dn.
     user_dn = user_entry[0]
+    attrs = user_entry[1]
     try:
         l.simple_bind_s(user_dn, password)
     except ldap.INVALID_CREDENTIALS:
@@ -54,6 +57,8 @@ def login():
     session['username'] = username
     session['login'] = True
     session['born'] = time.time()
+    if 'admin' in attrs.get('permissionRoleName'):
+        session['admin'] = True
     current_app.logger.info('user "{}" logined. (ldap dn: {})'.format(username, user_dn))
 
     return OK
@@ -82,7 +87,8 @@ def validation_code():
     l = current_app.get_ldap_connection()
     user_entries = l.search_s(current_app.ldap_search_base,
                               ldap.SCOPE_SUBTREE,
-                              current_app.ldap_search_pattern.format(username=username))
+                              ldap.filter.escape_filter_chars(
+                                  current_app.ldap_search_pattern.format(username=username)))
     if not user_entries:  # impossible?
         current_app.logger.warn('username {} not found, fatal error.'.format(username))
         return UNKNOWN_ERROR
@@ -94,12 +100,12 @@ def validation_code():
     attrs = user_entry[1]
     if request.body['email']:
         # query email
-        if not send_email(attrs['email'], code):
+        if not send_email(attrs['email'], code, username):
             current_app.logger.warn(
                 'Failed to send email, {}, check configuration.'.format(attrs['email']))
             return SMS_FAILED
     elif request.body['phone']:
-        if not send_sms(attrs['telephoneNumber'], code):
+        if not send_sms(attrs['telephoneNumber'], code, username):
             current_app.logger.warn(
                 'Failed to send SMS, phone: {}, check configuration.'.format(attrs['telephoneNumber']))
             return SMS_FAILED
@@ -128,16 +134,16 @@ def register():
     if decode['email'] != email:
         return -30
     # check username
+    # FIXME: Reused
     l = current_app.get_ldap_connection()
     user_entries = l.search_s(current_app.ldap_search_base,
                               ldap.SCOPE_SUBTREE,
-                              current_app.ldap_search_pattern.format(username=username))
+                              ldap.filter.escape_filter_chars(
+                                  current_app.ldap_search_pattern.format(username=username)))
     if user_entries:  # username has been taken
         return DUPLICATED_USERNAME
-    # FIXME: escape string
-    user_dn = 'cn={},'.format(username) + config.LDAP_SEARCH_BASE
+    user_dn = 'cn={},'.format(ldap.dn.escape_dn_chars(username)) + config.LDAP_SEARCH_BASE
     # register
-    # TODO: add an entry, with telephone number
     l.add_s(user_dn, [('objectClass', [b'organizationalPerson', b'person', b'starstudioMember', b'top']),
                       ('email', bytes(email.encode('utf-8')))])
     # set session
