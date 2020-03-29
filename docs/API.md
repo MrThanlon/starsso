@@ -1,4 +1,4 @@
-# aStarSSO接口文档
+# StarSSO接口文档
 
 如果不做说明，则响应内容为JSON格式的字符串，这种情况保证包含`code`字段表示状态码，以及`msg`字段为状态码含义，对于获取数据的接口，数据如果有则会放在`data`字段。
 
@@ -224,10 +224,11 @@
 
 请求参数：
 
-|  字段名  | 必填 |  类型  |   说明   |
-| :------: | :--: | :----: | :------: |
-| username |  是  | String |  登录名  |
-| password |  否  | String |   密码   |
-|  email   |  否  | String | 电子邮箱 |
-|  phone   |  否  | String |  手机号  |
+|  字段名  | 必填 |  类型   |    说明    |
+| :------: | :--: | :-----: | :--------: |
+| username |  是  | String  |   登录名   |
+| password |  否  | String  |    密码    |
+|  email   |  否  | String  |  电子邮箱  |
+|  phone   |  否  | String  |   手机号   |
+|  admin   |  否  | Boolean | 是否管理员 |
 

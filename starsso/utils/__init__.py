@@ -9,9 +9,11 @@
 """
 import config
 import smtplib
+import ldap
+import ldap.filter
 from email.mime.text import MIMEText
 from email.header import Header
-from flask import jsonify, Response, Request, session
+from flask import jsonify, Response, Request, session, current_app
 
 import functools
 
@@ -151,7 +153,26 @@ def check_admin(f):
 
     @functools.wraps(f)
     def wrapped():
+        username = session['username']
         if 'admin' not in session:
+            current_app.logger.warn('None-admin user request admin API, denied.'.format(username))
+            return NOT_ADMIN
+        # real-time check for security reason
+        l = current_app.get_ldap_connection()
+        user_entries = l.search_s(current_app.ldap_search_base,
+                                  ldap.SCOPE_SUBTREE,
+                                  ldap.filter.escape_filter_chars(
+                                      current_app.ldap_search_pattern.format(username=username)))
+        if not user_entries:  # impossible?
+            current_app.logger.warn('username {} not found, fatal error.'.format(username))
+            return UNKNOWN_ERROR
+        if len(user_entries) > 1:  # ambiguous username. not allow to login.
+            current_app.logger.warn('ambiguous username "{}". login request is deined.'.format(username))
+            return INVALID_USER, 'Duplicated users found. The users are blocked for security reason. Consult administrator to get help.'
+        user_entry = user_entries[0]
+        attrs = user_entry[1]
+        if 'admin' not in attrs.get('permissionRoleName'):
+            current_app.logger.warn('None-admin user request admin API, denied.'.format(username))
             return NOT_ADMIN
         return f()
 

@@ -95,7 +95,6 @@ def validation_code():
     if len(user_entries) > 1:  # ambiguous username. not allow to login.
         current_app.logger.warn('ambiguous username "{}". login request is deined.'.format(username))
         return INVALID_USER, 'Duplicated users found. The users are blocked for security reason. Consult administrator to get help.'
-
     user_entry = user_entries[0]
     attrs = user_entry[1]
     if request.body['email']:

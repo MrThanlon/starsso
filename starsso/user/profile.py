@@ -76,4 +76,9 @@ def profile():
         return UNKNOWN_ERROR
     user_entry = user_entries[0]
     attrs = user_entry[1]
-    return {"username": username, "email": attrs['telephoneNumber'], "phone": "none"}
+    return {
+        "username": username,
+        "email": attrs['telephoneNumber'],
+        "phone": "none",
+        "admin": 'admin' in attrs.get('permissionRoleName')
+    }
