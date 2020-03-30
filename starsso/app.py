@@ -1,6 +1,7 @@
 # coding: utf-8
 
 from flask import Flask, jsonify, request, abort, g, session
+from flask_sqlalchemy import SQLAlchemy
 
 from datetime import timedelta
 
@@ -49,18 +50,43 @@ def register_services(app):
             file_handler.setLevel(logging.INFO)
 
 
+def register_db(app):
+    app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://{username}:{password}@{host}:{port}/{name}".format(
+        username=app.db_user,
+        password=app.db_pass,
+        host=app.db_host,
+        port=app.db_port,
+        name=app.db_name
+    )
+    app.db = SQLAlchemy(app)
+    # TODO: register Model
+
+
 def register_routes(app):
     user_routes.register(app, url_prefix="/user")
     admin_routes.register(app, url_prefix="/admin")
 
 
 def load_configuration(app):
-    # session
     config_file = os.path.abspath(os.environ.get('STARSSO_CONFIG_FILE', 'config.py'))
     app.config.from_pyfile(filename=config_file)
-    app.secret_key = app.config.get('SECRET_KEY', '')
-    if not app.secret_key:
-        raise "SECRET_KEY is missing."
+
+    # DB
+    app.db_host = app.config.get('DATABASE_HOST')
+    if not app.db_host:
+        raise "DATABASE_HOST missing."
+    app.db_user = app.config.get('DATABASE_USER')
+    if not app.db_user:
+        raise "DATABASE_USER missing."
+    app.db_pass = app.config.get('DATABASE_PASS')
+    if not app.db_pass:
+        raise "DATABASE_PASS missing."
+    app.db_name = app.config.get('DATABASE_NAME')
+    if not app.db_name:
+        raise "DATABASE_NAME missing."
+    app.db_port = app.config.get('DATABASE_PORT')
+    if not app.db_port:
+        app.db_port = 3306
 
     # LDAP
     app.ldap_uri = app.config.get('LDAP_URI', '')
@@ -81,8 +107,15 @@ def load_configuration(app):
     app.response_class = APIResponse
     app.request_class = APIRequest
 
+    # session
     session.permanent = True
-    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(seconds=config.session_expiration)
+    app.session_expiration = app.config.get('SESSION_EXPIRATION', '')
+    if not app.session_expiration:
+        raise "SESSION_EXPIRATION missing."
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(seconds=app.session_expiration)
+    app.secret_key = app.config.get('SECRET_KEY', '')
+    if not app.secret_key:
+        raise "SECRET_KEY is missing."
 
 
 def get_wsgi_application():

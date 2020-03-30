@@ -10,13 +10,13 @@ HMAC_KEY = b'aYUhjnyaYUHjnmYUh87Y5676yweuhj6'
 JWE_KEY = b'AhjhduhjYAUHHJf7hJAJ'
 
 # session expiration, second
-session_expiration = 864000
+SESSION_EXPIRATION = 864000
 
 # database
-database_host = '127.0.0.1'
-database_user = 'starsso'
-database_password = 'L1pFT497o2diNQci'
-database_name = 'starsso'
+DATABASE_HOST = '127.0.0.1'
+DATABASE_USER = 'sso'
+DATABASE_PASS = 'L1pFT497o2diNQci'
+DATABASE_NAME = 'sso'
 
 # LDAP
 LDAP_URI = 'ldap://xxx.xxx.xxx.xxx:xxx'

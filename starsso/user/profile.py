@@ -48,15 +48,17 @@ def profile_modify():
         current_app.logger.info('login with username {}. invalid password.'.format(username))
         return INVALID_USER
 
-    # TODO: generate modlist, modify entries, catch exception
+    # TODO: generate modlist, modify entries
+    # FIXME: catch exception
     modlist = []
     if email:
-        modlist.append(('email', email.encode('utf-8')))
+        modlist.append((ldap.MOD_REPLACE, 'email', email.encode('utf-8')))
     if phone:
-        modlist.append(('telephoneNumber', phone.encode('utf-8')))
-    l.modify_s(user_dn, modlist)
+        modlist.append((ldap.MOD_REPLACE, 'telephoneNumber', phone.encode('utf-8')))
+    if modlist:
+        l.modify_s(user_dn, modlist)
     if new_password:
-        l.passwd_s(user_dn, None, new_password.encode('utf-8'))
+        l.passwd_s(user_dn, None, new_password.encode('ascii'))
 
     return OK
 
