@@ -18,13 +18,12 @@ bp = Blueprint('profile_api', __name__)
 @check_login
 def profile_modify():
     username = session['username']
-    password = request.body['password']
+    password = request.body.get('password')
     new_password = request.body.get('newPassword')
     email = request.body.get('email')
     phone = request.body.get('phone')
-    vefify = request.body['verify']
-    if vefify != session['code']:
-        return -30
+    full_name = request.body.get('fullName')
+    verify = request.body.get('verify')
 
     # FIXME: reused
     l = current_app.get_ldap_connection()
@@ -39,14 +38,18 @@ def profile_modify():
         current_app.logger.warn('ambiguous username "{}". login request is deined.'.format(username))
         return INVALID_USER, 'Duplicated users found. The users are blocked for security reason. Consult administrator to get help.'
     user_entry = user_entries[0]
-
-    # re-bind according to user dn.
     user_dn = user_entry[0]
-    try:
-        l.simple_bind_s(user_dn, password)
-    except ldap.INVALID_CREDENTIALS:
-        current_app.logger.info('login with username {}. invalid password.'.format(username))
-        return INVALID_USER
+
+    # sensitive information
+    if email or new_password or phone:
+        if verify != session['code']:
+            return -30
+        # re-bind according to user dn.
+        try:
+            l.simple_bind_s(user_dn, password)
+        except ldap.INVALID_CREDENTIALS:
+            current_app.logger.info('login with username {}. invalid password.'.format(username))
+            return INVALID_USER
 
     # TODO: generate modlist, modify entries
     # FIXME: catch exception
@@ -55,6 +58,8 @@ def profile_modify():
         modlist.append((ldap.MOD_REPLACE, 'email', email.encode('utf-8')))
     if phone:
         modlist.append((ldap.MOD_REPLACE, 'telephoneNumber', phone.encode('utf-8')))
+    if full_name:
+        modlist.append((ldap.MOD_REPLACE, 'fullName', full_name.encode('utf-8')))
     if modlist:
         l.modify_s(user_dn, modlist)
     if new_password:
@@ -80,7 +85,8 @@ def profile():
     attrs = user_entry[1]
     return {
         "username": username,
-        "email": attrs['telephoneNumber'],
-        "phone": "none",
+        "email": attrs['email'],
+        "phone": attrs.get('phone'),
+        "fullName": attrs.get('fullName'),
         "admin": 'admin' in attrs.get('permissionRoleName')
     }

@@ -60,6 +60,7 @@ def modify():
     password = request.body.get('password')
     email = request.body.get('email')
     phone = request.body.get('phone')
+    full_name = request.body.get('fullName')
     admin = request.body.get('admin')
     l = current_app.get_ldap_connection()
     user_entries = l.search_s(current_app.ldap_search_base,
@@ -80,6 +81,8 @@ def modify():
     modlist = []
     if password:
         l.passwd_s(user_dn, None, password.encode('ascii'))
+    if full_name:
+        modlist.append((ldap.MOD_REPLACE, 'fullName', full_name.encode('utf-8')))
     if email:
         modlist.append((ldap.MOD_REPLACE, 'email', email.encode('utf-8')))
     if phone:

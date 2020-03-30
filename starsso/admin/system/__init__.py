@@ -43,5 +43,5 @@ def delete():
 @check_param
 @check_login
 @check_admin
-def add():
+def get():
     return []

@@ -70,6 +70,7 @@
 | username |  是  | String  |              用户名              |
 |  email   |  是  | String  |             电子邮箱             |
 |  phone   |  是  | String  | 手机号，类型是String但只接受数字 |
+| fullName |  是  | String  |               全名               |
 |  admin   |  是  | Boolean |           是否为管理员           |
 
 #### 请求验证码 - `/user/validationCode`
@@ -83,17 +84,18 @@
 
 #### 修改个人信息 - `/user/profile/modify`
 
-*注意：在修改之前需要请求验证码*
+*注意：除了修改全名之外，在修改之前需要请求验证码并提供原密码*
 
 请求参数：
 
 |   字段名    | 必填 |  类型  |               说明               |
 | :---------: | :--: | :----: | :------------------------------: |
-|  password   |  是  | String |              原密码              |
+|  password   |  否  | String |              原密码              |
 | newPassword |  否  | String |              新密码              |
 |    email    |  否  | String |             电子邮箱             |
 |    phone    |  否  | String | 手机号，类型是String但只接受数字 |
-|   verify    |  是  | Number |              验证码              |
+|  fullName   |  否  | String |               全名               |
+|   verify    |  否  | Number |              验证码              |
 
 #### 查看权限 - `/user/permission`
 
@@ -230,5 +232,6 @@
 | password |  否  | String  |    密码    |
 |  email   |  否  | String  |  电子邮箱  |
 |  phone   |  否  | String  |   手机号   |
+| fullName |  否  | String  |    全名    |
 |  admin   |  否  | Boolean | 是否管理员 |
 
