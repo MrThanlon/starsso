@@ -14,6 +14,7 @@ import ldap.filter
 from email.mime.text import MIMEText
 from email.header import Header
 from flask import jsonify, Response, Request, session, current_app
+from flask_sqlalchemy import SQLAlchemy
 
 import functools
 

@@ -51,15 +51,41 @@ def register_services(app):
 
 
 def register_db(app):
-    app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://{username}:{password}@{host}:{port}/{name}".format(
+    app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://{username}:{password}@{host}:{port}/{name}".format(
         username=app.db_user,
         password=app.db_pass,
         host=app.db_host,
         port=app.db_port,
         name=app.db_name
     )
-    app.db = SQLAlchemy(app)
-    # TODO: register Model
+    db = SQLAlchemy(app)
+    db.reflect()
+
+    class Validation(db.Model):
+        __tablename__ = 'validation'
+
+        def __init__(self, code, expire):
+            self.code = code
+            self.expire = expire
+
+    class System(db.Model):
+        __tablename__ = 'system'
+
+        def __init__(self, name, url=''):
+            self.name = name
+            self.url = url
+
+    class Invite(db.Model):
+        __tablename__ = 'invite'
+
+        def __init__(self, code, expire):
+            self.code = code
+            self.expire = expire
+
+    app.db = db
+    app.Validation = Validation
+    app.System = System
+    app.Invite = Invite
 
 
 def register_routes(app):
@@ -108,7 +134,6 @@ def load_configuration(app):
     app.request_class = APIRequest
 
     # session
-    session.permanent = True
     app.session_expiration = app.config.get('SESSION_EXPIRATION', '')
     if not app.session_expiration:
         raise "SESSION_EXPIRATION missing."
@@ -123,7 +148,14 @@ def get_wsgi_application():
 
     load_configuration(app)
     register_routes(app)
+    register_db(app)
     register_services(app)
+
+    @app.before_request
+    def before_request():
+        session.permanent = True
+        if not request.parse():
+            return -1
 
     return app
 
