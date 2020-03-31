@@ -61,12 +61,17 @@ def register_db(app):
     db = SQLAlchemy(app)
     db.reflect()
 
+    # validation not used
     class Validation(db.Model):
         __tablename__ = 'validation'
 
         def __init__(self, code, expire):
             self.code = code
             self.expire = expire
+
+        def add(self):
+            db.session.add(self)
+            return db.session.commit()
 
     class System(db.Model):
         __tablename__ = 'system'
@@ -75,12 +80,19 @@ def register_db(app):
             self.name = name
             self.url = url
 
+        def add(self):
+            db.session.add(self)
+            return db.session.commit()
+
     class Invite(db.Model):
         __tablename__ = 'invite'
 
-        def __init__(self, code, expire):
+        def __init__(self, code):
             self.code = code
-            self.expire = expire
+
+        def add(self):
+            db.session.add(self)
+            return db.session.commit()
 
     app.db = db
     app.Validation = Validation

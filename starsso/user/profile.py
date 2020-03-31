@@ -1,10 +1,9 @@
 # coding: utf-8
 
 from flask import Blueprint, request, session, current_app
-
 import ldap
 import ldap.filter
-
+import time
 from starsso.utils import check_param, check_login, UNKNOWN_ERROR, send_sms, SMS_FAILED, DUPLICATED_USERNAME, \
     INVALID_USER, OK
 
@@ -42,7 +41,7 @@ def profile_modify():
 
     # sensitive information
     if email or new_password or phone:
-        if verify != session['code']:
+        if verify != session['validation_code'] or session['validation_expiration'] < time.time():
             return -30
         # re-bind according to user dn.
         try:

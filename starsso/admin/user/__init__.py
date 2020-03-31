@@ -1,8 +1,12 @@
 from flask import Blueprint, request, current_app
 from starsso.utils import check_param, check_login, UNKNOWN_ERROR, send_sms, SMS_FAILED, DUPLICATED_USERNAME, \
-    send_email, check_admin, INVALID_USER, INVALID_REQUEST
+    send_email, check_admin, INVALID_USER, INVALID_REQUEST, EXISTENT_EMAIL
 import ldap
 import ldap.filter
+import random
+import time
+import config
+import jwt
 
 bp = Blueprint('system', __name__, url_prefix='/system')
 
@@ -18,11 +22,23 @@ def invite():
     if (email and phone) or (not email and not phone):
         return INVALID_REQUEST
     l = current_app.get_ldap_connection()
-    # TODO: invite
+    user_entries = l.search_s(current_app.ldap_search_base,
+                              ldap.SCOPE_SUBTREE,
+                              ldap.filter.escape_filter_chars(
+                                  '(objectClass=person)(email={email})'.format(email=email)
+                              ))
+    if user_entries:
+        return EXISTENT_EMAIL
+    # generate invite code
+    # FIXME: not unique, it may cause crash, catch exception
+    unique_code = random.randint(100000, 999999)
+    code = jwt.encode({'email': email, 'code': unique_code, 'expire': time.time() + config.INVITE_EXPIRATION},
+                      config.SECRET_KEY)
+    current_app.Invite(unique_code).add()
     if email:
-        pass
+        send_email(email, code, email)
     if phone:
-        pass
+        send_sms(phone, code)
     return 0
 
 

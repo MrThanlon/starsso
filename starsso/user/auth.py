@@ -104,13 +104,14 @@ def validation_code():
                 'Failed to send email, {}, check configuration.'.format(attrs['email']))
             return SMS_FAILED
     elif request.body['phone']:
-        if not send_sms(attrs['telephoneNumber'], code, username):
+        if not send_sms(attrs['telephoneNumber'], code):
             current_app.logger.warn(
                 'Failed to send SMS, phone: {}, check configuration.'.format(attrs['telephoneNumber']))
             return SMS_FAILED
 
     # set session
-    session['code'] = code
+    session['validation_code'] = code
+    session['validation_expire'] = time.time() + config.VALIDATION_EXPIRATION
     return 0
 
 
@@ -124,14 +125,19 @@ def register():
     email = request.body['email']
     # code is jwt, decode it
     try:
-        decode = jwt.decode(code, config.SECRET_KEY, algorithms='HS256')
+        decode = jwt.decode(code, config.SECRET_KEY)
     except jwt.exceptions.InvalidSignatureError:
-        return -30
+        return -11
     except jwt.DecodeError:
         return -100
     # code include email and birthday
     if decode['email'] != email:
-        return -30
+        return -11
+    token = current_app.db.query(current_app.Validaton).filter_by(code=decode['code'])
+    if not token:
+        return -11
+    if time.time() > decode['expire']:
+        return -11
     # check username
     # FIXME: Reused
     l = current_app.get_ldap_connection()
@@ -145,6 +151,9 @@ def register():
     # register
     l.add_s(user_dn, [('objectClass', [b'organizationalPerson', b'person', b'starstudioMember', b'top']),
                       ('email', bytes(email.encode('utf-8')))])
+    # remove code
+    current_app.db.session.delete(token)
+    current_app.db.session.commit()
     # set session
     # FIXME: Reused
     session['username'] = username
