@@ -35,7 +35,5 @@ def permission():
     if not ans:
         ans = []
     systems = current_app.db.session.query(current_app.System).all()
-    system_url = {}
-    for s in systems:
-        system_url[s.name] = s.url
+    system_url = {s.name: s.url for s in systems}
     return list(map(lambda x: {'name': x, 'url': system_url[x]}, ans))

@@ -163,11 +163,11 @@
 
 *注意：返回的数据是一个数组，每个元素的字段如下：*
 
-|   字段名   | 必填 |  类型  |          说明          |
-| :--------: | :--: | :----: | :--------------------: |
-| systemName |  是  | String |        系统名称        |
-|    URL     |  是  | String |        系统链接        |
-|   users    |  是  | Array  | 用户列表，元素为登录名 |
+| 字段名 | 必填 |  类型  |          说明          |
+| :----: | :--: | :----: | :--------------------: |
+|  name  |  是  | String |        系统名称        |
+|  url   |  是  | String |        系统链接        |
+| users  |  是  | Array  | 用户列表，元素为登录名 |
 
 返回示例：
 
@@ -177,18 +177,16 @@
   "msg": "ok",
   "data": [
     {
-      "systemID": 127,
-      "systemName": "VPN",
-      "URL": "https://vpn.starstudio.org/"
+      "name": "VPN",
+      "url": "https://vpn.starstudio.org/"
       "users": [
         "abc@example.com",
         "efg@example.com"
       ]
     },
     {
-      "systemID": 176,
-      "systemName": "Graylog",
-      "URL": "http://graylog.starstudio.org/",
+      "name": "Graylog",
+      "url": "http://graylog.starstudio.org/",
       "users":[]
     },
     ...
@@ -206,6 +204,41 @@
 | phone  |  否  | String |  手机号  |
 
 *注意：邮箱和手机号只填写一个，会发送邀请码和邀请链接*
+
+#### 查看用户 - `/admin/user/get`
+
+*注意：返回的数据是一个数组，每个元素的字段如下：*
+
+|  字段名  | 必填 |  类型   |          说明          |
+| :------: | :--: | :-----: | :--------------------: |
+| username |  是  | String  |        系统名称        |
+| fullName |  是  | String  |           画           |
+|  email   |  是  | String  | 用户列表，元素为登录名 |
+|  admin   |  是  | Boolean |       是否管理员       |
+
+返回示例：
+
+```json
+{
+  "code": 0,
+  "msg": "ok",
+  "data": [
+    {
+      "username": "hzy",
+      "fullName": "Huang ZY",
+      "email": "i@anclx.cc",
+      "admin": true
+    },
+    {
+      "username": "abc",
+      "fullName": "AB c",
+      "email": "i@example.com",
+      "admin": false
+    },
+    ...
+  ]
+}
+```
 
 #### 删除用户 - `/admin/user/delete`
 

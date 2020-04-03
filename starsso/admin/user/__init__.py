@@ -42,6 +42,26 @@ def invite():
     return 0
 
 
+@bp.route('/get', methods=('POST', 'GET'))
+@check_param
+@check_login
+@check_admin
+def get():
+    l = current_app.get_ldap_connection()
+    user_entries = l.search_s(current_app.ldap_search_base,
+                              ldap.SCOPE_SUBTREE,
+                              ldap.filter.escape_filter_chars(
+                                  '(objectClass=person)(email={email})'.format(email=email)
+                              ))
+    ans = [{
+        'username': x[1]['cn'][0],
+        'fullName': x[1]['fullName'][0],
+        'email': x[1]['email'][0],
+        'admin': 'admin' in x[1].get('permissionRoleName')
+    } for x in user_entries]
+    return ans
+
+
 @bp.route('/delete', methods=('POST', 'GET'))
 @check_param
 @check_login
