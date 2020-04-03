@@ -1,7 +1,7 @@
 # coding: utf-8
 
 from flask import Blueprint, session, current_app
-
+from functools import reduce
 import ldap
 import ldap.filter
 
@@ -34,4 +34,8 @@ def permission():
     ans = attrs.get('permissionRoleName')
     if not ans:
         ans = []
-    return ans
+    systems = current_app.db.session.query(current_app.System).all()
+    system_url = {}
+    for s in systems:
+        system_url[s.name] = s.url
+    return list(map(lambda x: {'name': x, 'url': system_url[x]}, ans))

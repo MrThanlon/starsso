@@ -15,8 +15,8 @@ bp = Blueprint('systemd', __name__, url_prefix='/system')
 @check_login
 @check_admin
 def add():
-    name = request.body['systemName']
-    url = request.body['URL']
+    name = request.body['name']
+    url = request.body['url']
     users = request.body.get('users')
     if users:
         l = current_app.get_ldap_connection()
@@ -35,7 +35,7 @@ def add():
             l.modify_s(dn, [(ldap.MOD_ADD, 'permissionRoleName', name_b)])
     system = current_app.System(name, url)
     system.add()
-    return {"systemID": system.ID}
+    return 0
 
 
 @bp.route('/modify', methods=('GET', 'POST'))
@@ -43,10 +43,10 @@ def add():
 @check_login
 @check_admin
 def modify():
-    system_id = request.body['systemID']
-    url = request.body.get('URL')
+    name = request.body['name']
+    url = request.body.get('url')
     users = request.body.get('users')
-    system = current_app.db.session.query(current_app.System).filter_by(ID=system_id).first()
+    system = current_app.db.session.query(current_app.System).filter_by(name=name).first()
     if not system:
         return NON_EXISTENT_ID
     if users:
@@ -78,8 +78,8 @@ def modify():
 @check_login
 @check_admin
 def delete():
-    system_id = request.body['systemID']
-    system = current_app.db.session.query(current_app.System).filter_by(ID=system_id).first()
+    name = request.body['name']
+    system = current_app.db.session.query(current_app.System).filter_by(name=name).first()
     if not system:
         return NON_EXISTENT_ID
     # FIXME: catch exception
@@ -113,5 +113,5 @@ def get():
                                       '(&(objectClass=person)(permissionRoleName={system}))'.format(system=s.name)
                                   ))
         users = list(map(lambda x: x[1]['cn'][0].decode('utf-8'), user_entries))
-        ans.append({'systemID': s.ID, 'systemName': s.name, 'URL': s.url, 'users': users})
+        ans.append({'name': s.name, 'url': s.url, 'users': users})
     return ans
