@@ -24,9 +24,8 @@ def invite():
     l = current_app.get_ldap_connection()
     user_entries = l.search_s(current_app.ldap_search_base,
                               ldap.SCOPE_SUBTREE,
-                              ldap.filter.escape_filter_chars(
-                                  '(objectClass=person)(email={email})'.format(email=email)
-                              ))
+                              '(objectClass=person)(email={email})'.format(
+                                  email=ldap.filter.escape_filter_chars(email)))
     if user_entries:
         return EXISTENT_EMAIL
     # generate invite code
@@ -48,16 +47,12 @@ def invite():
 @check_admin
 def get():
     l = current_app.get_ldap_connection()
-    user_entries = l.search_s(current_app.ldap_search_base,
-                              ldap.SCOPE_SUBTREE,
-                              ldap.filter.escape_filter_chars(
-                                  '(objectClass=person)(email={email})'.format(email=email)
-                              ))
+    user_entries = l.search_s(current_app.ldap_search_base, ldap.SCOPE_SUBTREE, '(objectClass=person)')
     ans = [{
-        'username': x[1]['cn'][0],
-        'fullName': x[1]['fullName'][0],
-        'email': x[1]['email'][0],
-        'admin': 'admin' in x[1].get('permissionRoleName')
+        'username': x[1]['cn'][0].decode('utf-8'),
+        'fullName': x[1]['fullName'][0].decode('utf-8'),
+        'email': x[1]['email'][0].decode('utf-8'),
+        'admin': b'admin' in x[1].get('permissionRoleName')
     } for x in user_entries]
     return ans
 
@@ -71,8 +66,8 @@ def delete():
     l = current_app.get_ldap_connection()
     user_entries = l.search_s(current_app.ldap_search_base,
                               ldap.SCOPE_SUBTREE,
-                              ldap.filter.escape_filter_chars(
-                                  current_app.ldap_search_pattern.format(username=username)))
+                              current_app.ldap_search_pattern.format(
+                                  username=ldap.filter.escape_filter_chars(username)))
     if not user_entries:  # impossible?
         current_app.logger.info('deny modify request with username "{}". username not found.'.format(username))
         return INVALID_USER
@@ -101,8 +96,8 @@ def modify():
     l = current_app.get_ldap_connection()
     user_entries = l.search_s(current_app.ldap_search_base,
                               ldap.SCOPE_SUBTREE,
-                              ldap.filter.escape_filter_chars(
-                                  current_app.ldap_search_pattern.format(username=username)))
+                              current_app.ldap_search_pattern.format(
+                                  username=ldap.filter.escape_filter_chars(username)))
     if not user_entries:  # impossible?
         current_app.logger.info('deny modify request with username "{}". username not found.'.format(username))
         return INVALID_USER
@@ -112,7 +107,7 @@ def modify():
     user_entry = user_entries[0]
 
     user_dn = user_entry[0]
-    attrs = user_entries[1]
+    attrs = user_entry[1]
     # FIXME: catch exception
     modlist = []
     if password:
@@ -124,9 +119,9 @@ def modify():
     if phone:
         modlist.append((ldap.MOD_REPLACE, 'telephoneNumber', phone.encode('utf-8')))
     if admin:
-        if admin == 'True' and ('admin' not in attrs.get('permissionRoleName')):
+        if admin == 'True' and (b'admin' not in attrs.get('permissionRoleName')):
             modlist.append((ldap.MOD_ADD, 'permissionRoleName', b'admin'))
-        elif 'admin' in attrs.get('permissionRoleName'):
+        elif b'admin' in attrs.get('permissionRoleName'):
             modlist.append((ldap.MOD_DELETE, 'permissionRoleName', b'admin'))
     if modlist:
         l.modify_s(user_dn, modlist)

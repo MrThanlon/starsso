@@ -21,10 +21,10 @@ def add():
     if users:
         l = current_app.get_ldap_connection()
         filter_str = '(&(objectClass=person)(|{}))'.format(
-            reduce(lambda x, y: x + '(cn={})'.format(y), users, ''))
+            reduce(lambda x, y: x + '(cn={})'.format(ldap.filter.escape_filter_chars(y)), users, ''))
         user_entries = l.search_s(current_app.ldap_search_base,
                                   ldap.SCOPE_SUBTREE,
-                                  ldap.filter.escape_filter_chars(filter_str))
+                                  filter_str)
         if len(user_entries) != len(users):
             return INCLUDE_NON_EXISTENT_USERNAME
         dns = map(lambda x: x[0], user_entries)
@@ -49,13 +49,14 @@ def modify():
     system = current_app.db.session.query(current_app.System).filter_by(name=name).first()
     if not system:
         return NON_EXISTENT_ID
+    # FIXME: remove the user permission
     if users:
         l = current_app.get_ldap_connection()
         filter_str = '(&(objectClass=person)(|{}))'.format(
-            reduce(lambda x, y: x + '(cn={})'.format(y), users, ''))
+            reduce(lambda x, y: x + '(cn={})'.format(ldap.filter.escape_filter_chars(y)), users, ''))
         user_entries = l.search_s(current_app.ldap_search_base,
                                   ldap.SCOPE_SUBTREE,
-                                  ldap.filter.escape_filter_chars(filter_str))
+                                  filter_str)
         if len(user_entries) != len(users):
             return INCLUDE_NON_EXISTENT_USERNAME
         dns = map(lambda x: x[0], user_entries)
@@ -85,11 +86,9 @@ def delete():
     # FIXME: catch exception
     # remove from LDAP
     l = current_app.get_ldap_connection()
-    user_entries = l.search_s(current_app.ldap_search_base,
-                              ldap.SCOPE_SUBTREE,
-                              ldap.filter.escape_filter_chars(
-                                  '(&(objectClass=person)(permissionRoleName={name}))'.format(name=system.name)
-                              ))
+    user_entries = l.search_s(current_app.ldap_search_base, ldap.SCOPE_SUBTREE,
+                              '(&(objectClass=person)(permissionRoleName={name}))'.format(
+                                  name=ldap.filter.escape_filter_chars(system.name)))
     name_b = system.name.encode('utf-8')
     for u in user_entries:
         l.modify_s(u[0], [(ldap.MOD_DELETE, 'permissionRoleName', name_b)])
@@ -109,9 +108,8 @@ def get():
     for s in systems:
         user_entries = l.search_s(current_app.ldap_search_base,
                                   ldap.SCOPE_SUBTREE,
-                                  ldap.filter.escape_filter_chars(
-                                      '(&(objectClass=person)(permissionRoleName={system}))'.format(system=s.name)
-                                  ))
+                                  '(&(objectClass=person)(permissionRoleName={system}))'.format(
+                                    system=ldap.filter.escape_filter_chars(s.name)))
         users = list(map(lambda x: x[1]['cn'][0].decode('utf-8'), user_entries))
         ans.append({'name': s.name, 'url': s.url, 'users': users})
     return ans

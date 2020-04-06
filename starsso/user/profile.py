@@ -1,6 +1,6 @@
 # coding: utf-8
 
-from flask import Blueprint, request, session, current_app
+from flask import Blueprint, request, session, current_app, jsonify
 import ldap
 import ldap.filter
 import time
@@ -28,8 +28,8 @@ def profile_modify():
     l = current_app.get_ldap_connection()
     user_entries = l.search_s(current_app.ldap_search_base,
                               ldap.SCOPE_SUBTREE,
-                              ldap.filter.escape_filter_chars(
-                                  current_app.ldap_search_pattern.format(username=username)))
+                              current_app.ldap_search_pattern.format(
+                                  username=ldap.filter.escape_filter_chars(username)))
     if not user_entries:  # impossible?
         current_app.logger.info('deny modify request with username "{}". username not found.'.format(username))
         return INVALID_USER
@@ -41,7 +41,7 @@ def profile_modify():
 
     # sensitive information
     if email or new_password or phone:
-        if verify != session['validation_code'] or session['validation_expiration'] < time.time():
+        if verify != session['validation_code'] or session['validation_expire'] > time.time():
             return -30
         # re-bind according to user dn.
         try:
@@ -50,6 +50,7 @@ def profile_modify():
             current_app.logger.info('login with username {}. invalid password.'.format(username))
             return INVALID_USER
 
+    l = current_app.get_ldap_connection()
     # TODO: generate modlist, modify entries
     # FIXME: catch exception
     modlist = []
@@ -75,8 +76,8 @@ def profile():
     l = current_app.get_ldap_connection()
     user_entries = l.search_s(current_app.ldap_search_base,
                               ldap.SCOPE_SUBTREE,
-                              ldap.filter.escape_filter_chars(
-                                  current_app.ldap_search_pattern.format(username=username)))
+                              current_app.ldap_search_pattern.format(
+                                  username=ldap.filter.escape_filter_chars(username)))
     if not user_entries:  # impossible?
         current_app.logger.warn('username {} not found, fatal error.'.format(username))
         return UNKNOWN_ERROR
@@ -84,8 +85,8 @@ def profile():
     attrs = user_entry[1]
     return {
         "username": username,
-        "email": attrs['email'],
-        "phone": attrs.get('phone'),
-        "fullName": attrs.get('fullName'),
-        "admin": 'admin' in attrs.get('permissionRoleName')
+        "email": attrs['email'][0].decode('utf-8'),
+        "phone": attrs.get('telephoneNumber')[0].decode('utf-8'),
+        "fullName": attrs.get('fullName')[0].decode('utf-8'),
+        "admin": b'admin' in attrs.get('permissionRoleName')
     }

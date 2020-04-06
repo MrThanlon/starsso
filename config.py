@@ -25,14 +25,14 @@ DATABASE_PASS = 'L1pFT497o2diNQci'
 DATABASE_NAME = 'sso'
 
 # LDAP
-LDAP_URI = 'ldap://xxx.xxx.xxx.xxx:xxx'
-LDAP_ROOT_BIND_DN = 'cn=admin,dc=starstudio,dc=com'
-LDAP_PASSWORD = ''
+LDAP_URI = 'ldap://47.103.204.9'
+LDAP_ROOT_BIND_DN = 'cn=admin,dc=nodomain'
+LDAP_PASSWORD = 'huangziyi.1970'
 LDAP_SEARCH_PATTERN = '(&(objectClass=person)(cn={username}))'  # 一定要 escaped 和 validate ，小心注入
 LDAP_SEARCH_BASE = 'ou=starstudio,dc=nodomain'
 
 # SMTP
-SMTP_HOST = 'smtp.example.com'
-SMTP_USER = 'xxx@example.com'
-SMTP_PASS = '123'
-SMTP_SENDER = 'xxx@example.com'
+SMTP_HOST = 'smtp.qq.com'
+SMTP_USER = '867945543@qq.com'
+SMTP_PASS = 'kefcdpsowpgybbih'
+SMTP_SENDER = '867945543@qq.com'

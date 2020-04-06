@@ -11,7 +11,7 @@ from starsso.utils import check_param, check_login, UNKNOWN_ERROR, send_sms, SMS
 bp = Blueprint('user_permission_api', __name__)
 
 
-@bp.route("/", methods=('GET', 'POST'))
+@bp.route("/permission", methods=('GET', 'POST'))
 @check_param
 @check_login
 def permission():
@@ -20,8 +20,8 @@ def permission():
     l = current_app.get_ldap_connection()
     user_entries = l.search_s(current_app.ldap_search_base,
                               ldap.SCOPE_SUBTREE,
-                              ldap.filter.escape_filter_chars(
-                                  current_app.ldap_search_pattern.format(username=username)))
+                              current_app.ldap_search_pattern.format(
+                                  username=ldap.filter.escape_filter_chars(username)))
     if not user_entries:  # impossible?
         current_app.logger.info('deny modify request with username "{}". username not found.'.format(username))
         return INVALID_USER
@@ -36,4 +36,4 @@ def permission():
         ans = []
     systems = current_app.db.session.query(current_app.System).all()
     system_url = {s.name: s.url for s in systems}
-    return list(map(lambda x: {'name': x, 'url': system_url[x]}, ans))
+    return list(map(lambda x: {'name': x.decode('utf-8'), 'url': system_url.get(x.decode('utf-8'))}, ans))

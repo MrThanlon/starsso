@@ -22,9 +22,9 @@ def login():
     """
         sso web login API.
     """
-    username, password = request.body.username, request.body.password
+    username, password = request.body['username'], request.body['password']
 
-    if session.login:
+    if 'login' in session:
         current_app.logger.info(
             'deny login request with user "{}" for existing session of user "{}"'.format(username, session['username']))
         return ALREADY_LOGINED
@@ -33,14 +33,14 @@ def login():
     l = current_app.get_ldap_connection()
     user_entries = l.search_s(current_app.ldap_search_base,
                               ldap.SCOPE_SUBTREE,
-                              ldap.filter.escape_filter_chars(
-                                  current_app.ldap_search_pattern.format(username=username)))
+                              current_app.ldap_search_pattern.format(
+                                  username=ldap.filter.escape_filter_chars(username)))
     if not user_entries:  # user not found
         current_app.logger.info('deny login request with username "{}". username not found.'.format(username))
         return INVALID_USER
     if len(user_entries) > 1:  # ambiguous username. not allow to login.
         current_app.logger.warn('ambiguous username "{}". login request is deined.'.format(username))
-        return INVALID_USER, 'Duplicated users found. The users are blocked for security reason. Consult administrator to get help.'
+        return INVALID_USER
     user_entry = user_entries[0]
 
     # re-bind according to user dn.
@@ -57,8 +57,10 @@ def login():
     session['username'] = username
     session['login'] = True
     session['born'] = time.time()
-    if 'admin' in attrs.get('permissionRoleName'):
+    if b'admin' in attrs.get('permissionRoleName'):
         session['admin'] = True
+    else:
+        session['admin'] = False
     current_app.logger.info('user "{}" logined. (ldap dn: {})'.format(username, user_dn))
 
     return OK
@@ -87,8 +89,8 @@ def validation_code():
     l = current_app.get_ldap_connection()
     user_entries = l.search_s(current_app.ldap_search_base,
                               ldap.SCOPE_SUBTREE,
-                              ldap.filter.escape_filter_chars(
-                                  current_app.ldap_search_pattern.format(username=username)))
+                              current_app.ldap_search_pattern.format(
+                                  username=ldap.filter.escape_filter_chars(username)))
     if not user_entries:  # impossible?
         current_app.logger.warn('username {} not found, fatal error.'.format(username))
         return UNKNOWN_ERROR
@@ -97,16 +99,17 @@ def validation_code():
         return INVALID_USER, 'Duplicated users found. The users are blocked for security reason. Consult administrator to get help.'
     user_entry = user_entries[0]
     attrs = user_entry[1]
-    if request.body['email']:
+    if request.body.get('email'):
         # query email
-        if not send_email(attrs['email'], code, username):
+        if not send_email(attrs['email'][0].decode('utf-8'), code, username):
             current_app.logger.warn(
-                'Failed to send email, {}, check configuration.'.format(attrs['email']))
+                'Failed to send email, {}, check configuration.'.format(attrs['email'][0].decode('utf-8')))
             return SMS_FAILED
-    elif request.body['phone']:
-        if not send_sms(attrs['telephoneNumber'], code):
+    elif request.body.get('phone'):
+        if not send_sms(attrs['telephoneNumber'][0].decode('utf-8'), code):
             current_app.logger.warn(
-                'Failed to send SMS, phone: {}, check configuration.'.format(attrs['telephoneNumber']))
+                'Failed to send SMS, phone: {}, check configuration.'.format(
+                    attrs['telephoneNumber'][0].decode('utf-8')))
             return SMS_FAILED
 
     # set session
@@ -143,8 +146,8 @@ def register():
     l = current_app.get_ldap_connection()
     user_entries = l.search_s(current_app.ldap_search_base,
                               ldap.SCOPE_SUBTREE,
-                              ldap.filter.escape_filter_chars(
-                                  current_app.ldap_search_pattern.format(username=username)))
+                              current_app.ldap_search_pattern.format(
+                                  username=ldap.filter.escape_filter_chars(username)))
     if user_entries:  # username has been taken
         return DUPLICATED_USERNAME
     user_dn = 'cn={},'.format(ldap.dn.escape_dn_chars(username)) + config.LDAP_SEARCH_BASE
@@ -160,4 +163,10 @@ def register():
     session['login'] = True
     session['born'] = time.time()
     current_app.logger.info('user "{}" registered. (ldap dn: {})'.format(username, user_dn))
+    return 0
+
+
+@bp.route("/test", methods=('POST', 'GET'))
+@check_param
+def test():
     return 0

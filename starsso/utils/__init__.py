@@ -13,7 +13,7 @@ import ldap
 import ldap.filter
 from email.mime.text import MIMEText
 from email.header import Header
-from flask import jsonify, Response, Request, session, current_app
+from flask import jsonify, Response, Request, session, current_app, Flask
 from flask_sqlalchemy import SQLAlchemy
 
 import functools
@@ -117,6 +117,19 @@ class APIRequest(Request):
             return False
 
 
+class StarFlask(Flask):
+    def make_response(self, rv):
+        if isinstance(rv, int):
+            msg = ERROR_MESSAGES.get(rv)
+            if not msg:
+                msg = ERROR_MESSAGES[UNKNOWN_ERROR]
+            return super().make_response({'code': rv, 'msg': msg})
+        elif isinstance(rv, list):
+            return super().make_response({'code': OK, 'msg': ERROR_MESSAGES.get(OK), 'data': rv})
+        else:
+            return super().make_response(rv)
+
+
 def check_param(f):
     """
     Return -1 if missing param.
@@ -129,7 +142,8 @@ def check_param(f):
     def wrapped():
         try:
             return f()
-        except KeyError:
+        except KeyError as e:
+            current_app.logger.warn(e)
             return -1
 
     return wrapped
@@ -161,15 +175,15 @@ def check_admin(f):
     @functools.wraps(f)
     def wrapped():
         username = session['username']
-        if 'admin' not in session:
+        if not session.get('admin'):
             current_app.logger.warn('None-admin user request admin API, denied.'.format(username))
             return NOT_ADMIN
         # real-time check for security reason
         l = current_app.get_ldap_connection()
         user_entries = l.search_s(current_app.ldap_search_base,
                                   ldap.SCOPE_SUBTREE,
-                                  ldap.filter.escape_filter_chars(
-                                      current_app.ldap_search_pattern.format(username=username)))
+                                  current_app.ldap_search_pattern.format(
+                                      username=ldap.filter.escape_filter_chars(username)))
         if not user_entries:  # impossible?
             current_app.logger.warn('username {} not found, fatal error.'.format(username))
             return UNKNOWN_ERROR
@@ -178,7 +192,7 @@ def check_admin(f):
             return INVALID_USER, 'Duplicated users found. The users are blocked for security reason. Consult administrator to get help.'
         user_entry = user_entries[0]
         attrs = user_entry[1]
-        if 'admin' not in attrs.get('permissionRoleName'):
+        if b'admin' not in attrs.get('permissionRoleName'):
             current_app.logger.warn('None-admin user request admin API, denied.'.format(username))
             return NOT_ADMIN
         return f()
@@ -194,16 +208,16 @@ def send_sms(phone, code):
 
 def send_email(email, code, user):
     receivers = [email]
-    message = MIMEText('{}'.format(code), 'plain', 'utf-8')
-    message['From'] = Header("StarSSO", 'utf-8')
+    message = MIMEText('Your validation code is {}, use it in 5m.'.format(code), 'plain', 'utf-8')
+    message['From'] = Header('StarSSO', 'utf-8')
     message['To'] = Header(user, 'utf-8')
-    message['Subject'] = Header('[StarSSO] Validation Code', 'utf-8')
+    message['Subject'] = Header('StarSSO Validation Code', 'utf-8')
     try:
-        smtp = smtplib.SMTP()
-        # FIXME: use SSL, not port 25?
-        smtp.connect(config.SMTP_HOST, 25)
+        smtp = smtplib.SMTP_SSL(config.SMTP_HOST, 465)
+        smtp.connect(config.SMTP_HOST, 465)
         smtp.login(config.SMTP_USER, config.SMTP_PASS)
-        smtp.sendmail(config.SMTP_SENDER, receivers, message.as_string())
-    except smtplib.SMTPException:
+        smtp.sendmail(config.SMTP_SENDER, email, message.as_string())
+    except smtplib.SMTPException as e:
+        current_app.logger.warn(e)
         return False
     return True

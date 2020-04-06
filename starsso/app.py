@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 from datetime import timedelta
 
-from .utils import APIResponse, APIRequest
+from starsso.utils import APIResponse, APIRequest, StarFlask
 
 import ldap
 import weakref
@@ -14,8 +14,8 @@ import logging
 
 import config
 
-from .admin import routes as admin_routes
-from .user import routes as user_routes
+from starsso.admin import routes as admin_routes
+from starsso.user import routes as user_routes
 
 
 def register_services(app):
@@ -142,8 +142,8 @@ def load_configuration(app):
         raise "SECRET_KEY is missing."
 
 
-def get_wsgi_application():
-    app = Flask(__name__)
+def create_app():
+    app = StarFlask(__name__)
 
     load_configuration(app)
     register_routes(app)
@@ -156,7 +156,10 @@ def get_wsgi_application():
         if not request.parse():
             return -1
 
+    app.response_class = APIResponse
     return app
 
 
-app = get_wsgi_application()
+if __name__ == '__main__':
+    app = create_app()
+    app.run(debug=True)
