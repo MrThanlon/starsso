@@ -11,4 +11,4 @@ RUN set -xe;\
     apk del gcc alpine-sdk python3-dev g++ build-base;
 
 WORKDIR /app
-CMD ["/usr/bin/gunicorn", "-c", "file:./gunicorn.conf.py", "starsso:app"]
+CMD ["nginx&&/usr/bin/nginx && /usr/bin/gunicorn", "-c", "file:./gunicorn.conf.py", "starsso:app"]
