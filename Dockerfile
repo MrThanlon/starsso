@@ -8,6 +8,7 @@ RUN set -xe;\
     pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple;\
     cp /app/nginx.conf /etc/nginx/conf.d/default.conf;\
     mkdir /run/nginx;\
+    nginx;\
     apk del gcc alpine-sdk python3-dev g++ build-base;
 
 WORKDIR /app
