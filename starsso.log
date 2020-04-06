@@ -1,0 +1,2 @@
+[2020-04-06 17:35:02,225] INFO in auth: user "hzy" logined. (ldap dn: cn=hzy,ou=starstudio,dc=nodomain)
+[2020-04-06 17:39:51,969] INFO in auth: user "hzy" logined. (ldap dn: cn=hzy,ou=starstudio,dc=nodomain)

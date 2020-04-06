@@ -156,6 +156,15 @@ def create_app():
         if not request.parse():
             return -1
 
+    @app.after_request
+    def after_request(res):
+        res.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+        res.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        res.headers['Access-Control-Expose-Headers'] = '*'
+        res.headers['Access-Control-Allow-Methods'] = '*'
+        res.headers['Access-Control-Allow-Credentials'] = 'true'
+        return res
+
     app.response_class = APIResponse
     return app
 

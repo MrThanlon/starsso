@@ -124,7 +124,7 @@ class StarFlask(Flask):
             if not msg:
                 msg = ERROR_MESSAGES[UNKNOWN_ERROR]
             return super().make_response({'code': rv, 'msg': msg})
-        elif isinstance(rv, list):
+        elif isinstance(rv, list) or isinstance(rv, dict):
             return super().make_response({'code': OK, 'msg': ERROR_MESSAGES.get(OK), 'data': rv})
         else:
             return super().make_response(rv)
