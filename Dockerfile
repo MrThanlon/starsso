@@ -8,7 +8,7 @@ RUN set -xe;\
     pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple;\
     cp /app/nginx.conf /etc/nginx/conf.d/default.conf;\
     mkdir /run/nginx;\
-    apk del gcc alpine-sdk openldap-dev python3-dev g++ build-base;
+    apk del gcc alpine-sdk python3-dev g++ build-base;
 
 WORKDIR /app
 CMD ["/usr/bin/gunicorn", "-c", "file:./gunicorn.conf.py", "starsso:app"]
