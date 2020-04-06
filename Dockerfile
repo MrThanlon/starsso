@@ -4,6 +4,7 @@ COPY . /app
 RUN set -xe;\
     sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories;\
     apk add openldap-dev nginx gcc python3 python3-dev alpine-sdk --no-cache;\
+    cd /app;\
     pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple;\
     cp /app/nginx.conf /etc/nginx/conf.d/default.conf;\
     mkdir /run/nginx;\
