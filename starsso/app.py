@@ -169,7 +169,7 @@ def create_app():
 
     @app.route('/')
     def index():
-        return send_file('index.html')
+        return send_file('static/index.html')
 
     @app.route('/<path:filename>')
     def static_file(filename):
