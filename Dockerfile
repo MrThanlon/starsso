@@ -11,6 +11,8 @@ RUN set -xe;\
     cd /build;\
     git clone https://gitlab+deploy-token-5:5wntboMbqQzsyz6Zmp5s@git.uestc.cn/starsso/starsso-fe.git --depth 1;\
     cd starsso-fe;\
+    git pull origin staging;\
+    git checkout staging;\
     npm install --registry=https://registry.npm.taobao.org;\
     npm run build;\
     cp dist/* /app/starsso/static/;\
