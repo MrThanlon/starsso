@@ -3,13 +3,19 @@ FROM registry.stuhome.com/devops/dockerepo/alpine:3.7
 COPY . /app
 RUN set -xe;\
     sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories;\
-    apk add openldap-dev nginx gcc python3 python3-dev alpine-sdk --no-cache;\
+    apk add openldap-dev gcc python3 python3-dev alpine-sdk git npm --no-cache;\
     cd /app;\
     pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple;\
-    cp /app/nginx.conf /etc/nginx/conf.d/default.conf;\
-    mkdir /run/nginx;\
-    nginx;\
-    apk del gcc alpine-sdk python3-dev g++ build-base;
+    mkdir /build;\
+    cd /build;\
+    git clone https://gitlab+deploy-token-5:5wntboMbqQzsyz6Zmp5s@git.uestc.cn/starsso/starsso-fe.git --depth 1;\
+    cd starsso-fe;\
+    npm install --registry=https://registry.npm.taobao.org;\
+    npm run build;\
+    cp dist/* /app/starsso/static/;\
+    cd /;\
+    rm -rf /build;\
+    apk del gcc alpine-sdk python3-dev g++ build-base npm git;
 
 WORKDIR /app
 CMD ["/usr/bin/gunicorn", "-c", "file:./gunicorn.conf.py", "starsso:app"]

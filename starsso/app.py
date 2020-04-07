@@ -1,6 +1,6 @@
 # coding: utf-8
 
-from flask import Flask, jsonify, request, abort, g, session
+from flask import Flask, jsonify, request, abort, g, session, send_from_directory, send_file
 from flask_sqlalchemy import SQLAlchemy
 
 from datetime import timedelta
@@ -166,6 +166,14 @@ def create_app():
         return res
 
     app.response_class = APIResponse
+
+    @app.route('/')
+    def index():
+        return send_file('index.html')
+
+    @app.route('/<path:filename>')
+    def static_file(filename):
+        return send_from_directory(app.static_folder, filename)
     return app
 
 
