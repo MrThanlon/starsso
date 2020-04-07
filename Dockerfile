@@ -14,7 +14,7 @@ RUN set -xe;\
     git pull origin staging;\
     npm install --registry=https://registry.npm.taobao.org;\
     npm run build;\
-    cp dist/* /app/starsso/static/;\
+    cp -r dist/* /app/starsso/static/;\
     cd /;\
     rm -rf /build;\
     apk del gcc alpine-sdk python3-dev g++ build-base nodejs-npm git;
