@@ -3,7 +3,8 @@ FROM registry.stuhome.com/devops/dockerepo/alpine:3.7
 COPY . /app
 RUN set -xe;\
     sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories;\
-    apk add openldap-dev gcc python3 python3-dev alpine-sdk git npm --no-cache;\
+    apk update;\
+    apk add openldap-dev gcc python3 python3-dev alpine-sdk git nodejs-npm --no-cache;\
     cd /app;\
     pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple;\
     mkdir /build;\
@@ -15,7 +16,7 @@ RUN set -xe;\
     cp dist/* /app/starsso/static/;\
     cd /;\
     rm -rf /build;\
-    apk del gcc alpine-sdk python3-dev g++ build-base npm git;
+    apk del gcc alpine-sdk python3-dev g++ build-base nodejs-npm git;
 
 WORKDIR /app
 CMD ["/usr/bin/gunicorn", "-c", "file:./gunicorn.conf.py", "starsso:app"]
