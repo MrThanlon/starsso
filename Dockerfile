@@ -7,6 +7,7 @@ RUN set -xe;\
     apk add openldap-dev gcc python3 python3-dev alpine-sdk git nodejs-npm --no-cache;\
     cd /app;\
     pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple;\
+    mkdir starsso/static;\
     mkdir /build;\
     cd /build;\
     git clone https://gitlab+deploy-token-5:5wntboMbqQzsyz6Zmp5s@git.uestc.cn/starsso/starsso-fe.git --depth 1;\
