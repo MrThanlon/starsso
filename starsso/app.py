@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 from datetime import timedelta
 
-from starsso.utils import APIResponse, APIRequest, StarFlask
+from starsso.utils import APIResponse, APIRequest, StarFlask, MiniJSONEncoder
 
 import ldap
 import weakref
@@ -166,6 +166,8 @@ def create_app():
         return res
 
     app.response_class = APIResponse
+    app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
+    app.json_encoder = MiniJSONEncoder
 
     @app.route('/')
     def index():

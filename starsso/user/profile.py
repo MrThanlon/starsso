@@ -5,7 +5,7 @@ import ldap
 import ldap.filter
 import time
 from starsso.utils import check_param, check_login, UNKNOWN_ERROR, send_sms, SMS_FAILED, DUPLICATED_USERNAME, \
-    INVALID_USER, OK
+    INVALID_USER, OK, validate_str, INVALID_REQUEST, EXISTENT_EMAIL
 
 import config
 
@@ -41,9 +41,19 @@ def profile_modify():
 
     # sensitive information
     if email or new_password or phone:
+        if isinstance(verify, str):
+            # trans to int
+            try:
+                verify = int(verify)
+            except ValueError:
+                return INVALID_REQUEST
+        if not isinstance(verify, int):
+            return INVALID_REQUEST
         if verify != session['validation_code'] or session['validation_expire'] > time.time():
             return -30
         # re-bind according to user dn.
+        if not validate_str([password]):
+            return INVALID_REQUEST
         try:
             l.simple_bind_s(user_dn, password)
         except ldap.INVALID_CREDENTIALS:
@@ -55,14 +65,28 @@ def profile_modify():
     # FIXME: catch exception
     modlist = []
     if email:
-        modlist.append((ldap.MOD_REPLACE, 'email', email.encode('utf-8')))
+        # TODO: validate email
+        user_entries = l.search_s(current_app.ldap_search_base,
+                                  ldap.SCOPE_SUBTREE,
+                                  '(&(objectClass=person)(email={}))'.format(ldap.filter.escape_filter_chars(email)))
+        if len(user_entries):
+            return EXISTENT_EMAIL
+        if not validate_str([email]):
+            return INVALID_REQUEST
+        modlist.append((ldap.MOD_REPLACE, 'email', ldap.filter.escape_filter_chars(email).encode('utf-8')))
     if phone:
-        modlist.append((ldap.MOD_REPLACE, 'telephoneNumber', phone.encode('utf-8')))
+        if not validate_str([phone]):
+            return INVALID_REQUEST
+        modlist.append((ldap.MOD_REPLACE, 'telephoneNumber', ldap.filter.escape_filter_chars(phone).encode('utf-8')))
     if full_name:
-        modlist.append((ldap.MOD_REPLACE, 'fullName', full_name.encode('utf-8')))
+        if not validate_str([full_name]):
+            return INVALID_REQUEST
+        modlist.append((ldap.MOD_REPLACE, 'fullName', ldap.filter.escape_filter_chars(full_name).encode('utf-8')))
     if modlist:
         l.modify_s(user_dn, modlist)
     if new_password:
+        if not validate_str([new_password]):
+            return INVALID_REQUEST
         l.passwd_s(user_dn, None, new_password.encode('ascii'))
 
     return OK

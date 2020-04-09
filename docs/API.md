@@ -61,6 +61,7 @@
 | :--------: | :--: | :----: | :------------: |
 |  username  |  是  | String |     登录名     |
 |  password  |  是  | String |      密码      |
+|  fullName  |  是  | String |      全名      |
 |   email    |  是  | String | 注册的电子邮箱 |
 | inviteCode |  是  | String |     邀请码     |
 

@@ -10,7 +10,8 @@ from flask import Blueprint, request, session, g, jsonify, current_app
 from flask.views import MethodView
 from wtforms import Form, StringField, validators
 
-from starsso.utils import check_param, check_login, UNKNOWN_ERROR, send_sms, SMS_FAILED, DUPLICATED_USERNAME, send_email
+from starsso.utils import check_param, check_login, UNKNOWN_ERROR, send_sms, SMS_FAILED, DUPLICATED_USERNAME, \
+    send_email, validate_str
 from starsso.common.response import make_api_response, OK, INVALID_REQUEST, INVALID_USER, ALREADY_LOGINED
 
 bp = Blueprint('auth_api', __name__)
@@ -23,6 +24,9 @@ def login():
         sso web login API.
     """
     username, password = request.body['username'], request.body['password']
+    # validate
+    if not validate_str([username, password]):
+        return INVALID_REQUEST
 
     if 'login' in session:
         current_app.logger.info(
@@ -125,12 +129,14 @@ def register():
     code = request.body['inviteCode']
     username = request.body['username']
     password = request.body['password']
+    full_name = request.body['fullName']
     email = request.body['email']
+    # validate
+    if not validate_str([code, username, password, full_name, email]):
+        return INVALID_REQUEST
     # code is jwt, decode it
     try:
         decode = jwt.decode(code, config.SECRET_KEY)
-    except jwt.exceptions.InvalidSignatureError:
-        return -11
     except jwt.DecodeError:
         return -100
     # code include email and birthday
@@ -153,7 +159,9 @@ def register():
     user_dn = 'cn={},'.format(ldap.dn.escape_dn_chars(username)) + config.LDAP_SEARCH_BASE
     # register
     l.add_s(user_dn, [('objectClass', [b'organizationalPerson', b'person', b'starstudioMember', b'top']),
-                      ('email', bytes(email.encode('utf-8')))])
+                      ('email', email.encode('utf-8')),
+                      ('fullName', full_name.encode('utf-8'))])
+    l.passwd_s(user_dn, None, password.encode('ascii'))
     # remove code
     current_app.db.session.delete(token)
     current_app.db.session.commit()
@@ -166,7 +174,7 @@ def register():
     return 0
 
 
-@bp.route("/test", methods=('POST', 'GET'))
-@check_param
-def test():
-    return 0
+# @bp.route("/test", methods=('POST', 'GET'))
+# @check_param
+# def test():
+#    return request.body

@@ -14,6 +14,7 @@ import ldap.filter
 from email.mime.text import MIMEText
 from email.header import Header
 from flask import jsonify, Response, Request, session, current_app, Flask
+from flask.json import JSONEncoder
 from flask_sqlalchemy import SQLAlchemy
 
 import functools
@@ -51,6 +52,12 @@ ERROR_MESSAGES = {
     EXISTENT_EMAIL: 'existent email address',
     UNKNOWN_ERROR: 'unknown error'
 }
+
+
+class MiniJSONEncoder(JSONEncoder):
+    """Minify JSON output."""
+    item_separator = ','
+    key_separator = ':'
 
 
 class APIResponse(Response):
@@ -104,10 +111,10 @@ class APIRequest(Request):
             if self.content_type == 'application/json':
                 self.body = self.get_json()
             elif self.content_type == 'application/x-www-form-urlencoded':
-                self.body = self.form
+                self.body = self.form.to_dict()
             elif self.content_type.startswith('multipart/form-data'):
                 # FIXME: file content
-                self.body = self.form
+                self.body = self.form.to_dict()
                 if self.files:
                     return False
             else:
@@ -220,4 +227,12 @@ def send_email(email, code, user):
     except smtplib.SMTPException as e:
         current_app.logger.warn(e)
         return False
+    return True
+
+
+def validate_str(l):
+    for i in l:
+        if (not isinstance(i, str)) or (len(i) == 0):
+            return False
+
     return True
