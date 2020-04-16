@@ -1,6 +1,6 @@
 from flask import Blueprint, request, current_app
 from starsso.utils import check_param, check_login, UNKNOWN_ERROR, send_sms, SMS_FAILED, DUPLICATED_USERNAME, \
-    send_email, check_admin, INVALID_USER, INVALID_REQUEST, EXISTENT_EMAIL
+    send_email, check_admin, INVALID_USER, INVALID_REQUEST, EXISTENT_EMAIL, validate_str
 import ldap
 import ldap.filter
 import random
@@ -63,6 +63,8 @@ def get():
 @check_admin
 def delete():
     username = request.body['username']
+    if not validate_str([username]):
+        return INVALID_REQUEST
     l = current_app.get_ldap_connection()
     user_entries = l.search_s(current_app.ldap_search_base,
                               ldap.SCOPE_SUBTREE,
@@ -88,11 +90,14 @@ def delete():
 @check_admin
 def modify():
     username = request.body['username']
+    if not validate_str([username]):
+        return INVALID_REQUEST
     password = request.body.get('password')
     email = request.body.get('email')
     phone = request.body.get('phone')
     full_name = request.body.get('fullName')
     admin = request.body.get('admin')
+
     l = current_app.get_ldap_connection()
     user_entries = l.search_s(current_app.ldap_search_base,
                               ldap.SCOPE_SUBTREE,
@@ -111,13 +116,21 @@ def modify():
     # FIXME: catch exception
     modlist = []
     if password:
+        if not validate_str([password]):
+            return INVALID_REQUEST
         l.passwd_s(user_dn, None, password.encode('ascii'))
     if full_name:
-        modlist.append((ldap.MOD_REPLACE, 'fullName', full_name.encode('utf-8')))
+        if not validate_str([full_name]):
+            return INVALID_REQUEST
+        modlist.append((ldap.MOD_REPLACE, 'fullName', ldap.filter.escape_filter_chars(full_name).encode('utf-8')))
     if email:
-        modlist.append((ldap.MOD_REPLACE, 'email', email.encode('utf-8')))
+        if not validate_str([email]):
+            return INVALID_REQUEST
+        modlist.append((ldap.MOD_REPLACE, 'email', ldap.filter.escape_filter_chars(email).encode('utf-8')))
     if phone:
-        modlist.append((ldap.MOD_REPLACE, 'telephoneNumber', phone.encode('utf-8')))
+        if not validate_str([email]):
+            return INVALID_REQUEST
+        modlist.append((ldap.MOD_REPLACE, 'telephoneNumber', ldap.filter.escape_filter_chars(phone).encode('utf-8')))
     if admin:
         if admin == 'True' and (b'admin' not in attrs.get('permissionRoleName')):
             modlist.append((ldap.MOD_ADD, 'permissionRoleName', b'admin'))
