@@ -35,12 +35,12 @@ def invite():
                       config.SECRET_KEY)
     current_app.Invite(unique_code).add()
     if email:
-        if not send_email(email, code, email):
+        if not send_email(email, code.decode('ascii'), email):
             current_app.looger.error('Failed to send email, {}, check configuration.'.format(email))
             return EMAIL_FAILED
 
     if phone:
-        if not send_sms(phone, code):
+        if not send_sms(phone, code.decode('ascii')):
             current_app.logger.error('Failed to send SMS, phone: {}, check configuration.'.format(phone))
             return SMS_FAILED
     return 0
