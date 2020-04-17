@@ -27,6 +27,7 @@ INVALID_REQUEST = -1
 INVALID_USER = -37
 ALREADY_LOGINED = -2
 SMS_FAILED = -40
+EMAIL_FAILED = -41
 DUPLICATED_USERNAME = -42
 NOT_ADMIN = -51
 NON_EXISTENT_ID = -53
@@ -45,6 +46,7 @@ ERROR_MESSAGES = {
     -30: 'wrong validation code',
     -33: 'expired cookie',
     SMS_FAILED: 'failed to send sms',
+    EMAIL_FAILED: 'failed to send email',
     DUPLICATED_USERNAME: 'duplicated username',
     NOT_ADMIN: 'not admin',
     NON_EXISTENT_ID: 'non-existent ID',

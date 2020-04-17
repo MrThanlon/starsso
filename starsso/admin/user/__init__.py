@@ -1,6 +1,6 @@
 from flask import Blueprint, request, current_app
 from starsso.utils import check_param, check_login, UNKNOWN_ERROR, send_sms, SMS_FAILED, DUPLICATED_USERNAME, \
-    send_email, check_admin, INVALID_USER, INVALID_REQUEST, EXISTENT_EMAIL, validate_str
+    send_email, check_admin, INVALID_USER, INVALID_REQUEST, EXISTENT_EMAIL, validate_str, EMAIL_FAILED
 import ldap
 import ldap.filter
 import random
@@ -35,9 +35,14 @@ def invite():
                       config.SECRET_KEY)
     current_app.Invite(unique_code).add()
     if email:
-        send_email(email, code, email)
+        if not send_email(email, code, email):
+            current_app.looger.error('Failed to send email, {}, check configuration.'.format(email))
+            return EMAIL_FAILED
+
     if phone:
-        send_sms(phone, code)
+        if not send_sms(phone, code):
+            current_app.logger.error('Failed to send SMS, phone: {}, check configuration.'.format(phone))
+            return SMS_FAILED
     return 0
 
 

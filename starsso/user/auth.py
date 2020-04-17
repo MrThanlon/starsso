@@ -11,7 +11,7 @@ from flask.views import MethodView
 from wtforms import Form, StringField, validators
 
 from starsso.utils import check_param, check_login, UNKNOWN_ERROR, send_sms, SMS_FAILED, DUPLICATED_USERNAME, \
-    send_email, validate_str
+    send_email, validate_str, EMAIL_FAILED
 from starsso.common.response import make_api_response, OK, INVALID_REQUEST, INVALID_USER, ALREADY_LOGINED
 
 bp = Blueprint('auth_api', __name__)
@@ -106,12 +106,12 @@ def validation_code():
     if request.body.get('email'):
         # query email
         if not send_email(attrs['email'][0].decode('utf-8'), code, username):
-            current_app.logger.warn(
+            current_app.logger.error(
                 'Failed to send email, {}, check configuration.'.format(attrs['email'][0].decode('utf-8')))
-            return SMS_FAILED
+            return EMAIL_FAILED
     elif request.body.get('phone'):
         if not send_sms(attrs['telephoneNumber'][0].decode('utf-8'), code):
-            current_app.logger.warn(
+            current_app.logger.error(
                 'Failed to send SMS, phone: {}, check configuration.'.format(
                     attrs['telephoneNumber'][0].decode('utf-8')))
             return SMS_FAILED
