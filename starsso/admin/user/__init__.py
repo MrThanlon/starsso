@@ -24,7 +24,7 @@ def invite():
     l = current_app.get_ldap_connection()
     user_entries = l.search_s(current_app.ldap_search_base,
                               ldap.SCOPE_SUBTREE,
-                              '(objectClass=person)(email={email})'.format(
+                              '(&(objectClass=person)(email={email}))'.format(
                                   email=ldap.filter.escape_filter_chars(email)))
     if user_entries:
         return EXISTENT_EMAIL
