@@ -98,7 +98,6 @@ def modify():
     if not validate_str([username]):
         return INVALID_REQUEST
     password = request.body.get('password')
-    email = request.body.get('email')
     phone = request.body.get('phone')
     full_name = request.body.get('fullName')
     admin = request.body.get('admin')
@@ -128,12 +127,8 @@ def modify():
         if not validate_str([full_name]):
             return INVALID_REQUEST
         modlist.append((ldap.MOD_REPLACE, 'fullName', ldap.filter.escape_filter_chars(full_name).encode('utf-8')))
-    if email:
-        if not validate_str([email]):
-            return INVALID_REQUEST
-        modlist.append((ldap.MOD_REPLACE, 'email', ldap.filter.escape_filter_chars(email).encode('utf-8')))
     if phone:
-        if not validate_str([email]):
+        if not validate_str([phone]):
             return INVALID_REQUEST
         modlist.append((ldap.MOD_REPLACE, 'telephoneNumber', ldap.filter.escape_filter_chars(phone).encode('utf-8')))
     if admin:

@@ -30,7 +30,7 @@ SMS_FAILED = -40
 EMAIL_FAILED = -41
 DUPLICATED_USERNAME = -42
 NOT_ADMIN = -51
-NON_EXISTENT_ID = -53
+NOT_EXISTENT_ID = -53
 INCLUDE_NON_EXISTENT_USERNAME = -55
 EXISTENT_EMAIL = -57
 UNKNOWN_ERROR = -100
@@ -49,7 +49,7 @@ ERROR_MESSAGES = {
     EMAIL_FAILED: 'failed to send email',
     DUPLICATED_USERNAME: 'duplicated username',
     NOT_ADMIN: 'not admin',
-    NON_EXISTENT_ID: 'non-existent ID',
+    NOT_EXISTENT_ID: 'non-existent ID',
     INCLUDE_NON_EXISTENT_USERNAME: 'users list includes non-existent username',
     EXISTENT_EMAIL: 'existent email address',
     UNKNOWN_ERROR: 'unknown error'

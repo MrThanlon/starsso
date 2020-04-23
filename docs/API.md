@@ -97,7 +97,6 @@
 | :---------: | :--: | :----: | :------------------------------: |
 |  password   |  否  | String |              原密码              |
 | newPassword |  否  | String |              新密码              |
-|    email    |  否  | String |             电子邮箱             |
 |    phone    |  否  | String | 手机号，类型是String但只接受数字 |
 |  fullName   |  否  | String |               全名               |
 |   verify    |  否  | Number |              验证码              |
@@ -135,11 +134,11 @@
 
 请求参数：
 
-| 字段名 | 必填 |  类型  |      说明      |
-| :----: | :--: | :----: | :------------: |
-|  name  |  是  | String |    系统名称    |
-|  url   |  是  | String |    系统名称    |
-| users  |  否  | Array  | 授权的用户列表 |
+| 字段名 | 必填 |  类型  |          说明           |
+| :----: | :--: | :----: | :---------------------: |
+|  name  |  是  | String | 系统名称，不允许为admin |
+|  url   |  是  | String |        系统名称         |
+| users  |  否  | Array  |     授权的用户列表      |
 
 #### 修改系统及分配权限 - `/admin/system/modify`
 
@@ -195,6 +194,16 @@
   ]
 }
 ```
+
+#### 添加/删除一个用户的权限 - `/admin/system/modifyPermission`
+
+请求参数：
+
+|  字段名  | 必填 |  类型   |   说明   |
+| :------: | :--: | :-----: | :------: |
+| username |  否  | String  |  用户名  |
+|  isAdd   |  否  | Boolean |  手机号  |
+|   name   |  是  | String  | 系统名称 |
 
 #### 新用户邀请 - `/admin/user/invite`
 
@@ -258,8 +267,6 @@
 | :------: | :--: | :-----: | :--------: |
 | username |  是  | String  |   登录名   |
 | password |  否  | String  |    密码    |
-|  email   |  否  | String  |  电子邮箱  |
 |  phone   |  否  | String  |   手机号   |
 | fullName |  否  | String  |    全名    |
 |  admin   |  否  | Boolean | 是否管理员 |
-

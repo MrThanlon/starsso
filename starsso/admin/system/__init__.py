@@ -1,6 +1,6 @@
 from flask import Blueprint, request, current_app
 from starsso.utils import check_param, check_login, UNKNOWN_ERROR, send_sms, SMS_FAILED, DUPLICATED_USERNAME, \
-    send_email, check_admin, NON_EXISTENT_ID, INVALID_USER, INCLUDE_NON_EXISTENT_USERNAME, validate_str, INVALID_REQUEST
+    send_email, check_admin, NOT_EXISTENT_ID, INVALID_USER, INCLUDE_NON_EXISTENT_USERNAME, validate_str, INVALID_REQUEST
 
 import ldap
 import ldap.filter
@@ -45,6 +45,7 @@ def add():
 @check_login
 @check_admin
 def modify():
+    # FIXME: might not be used
     name = request.body['name']
     url = request.body.get('url')
     users = request.body.get('users')
@@ -52,7 +53,7 @@ def modify():
         return INVALID_REQUEST
     system = current_app.db.session.query(current_app.System).filter_by(name=name).first()
     if not system:
-        return NON_EXISTENT_ID
+        return NOT_EXISTENT_ID
     # FIXME: remove the user permission
     if users:
         l = current_app.get_ldap_connection()
@@ -78,6 +79,35 @@ def modify():
     return 0
 
 
+@bp.route('/modifyPermission', methods=('GET', 'POST'))
+@check_param
+@check_login
+@check_admin
+def modify_permission():
+    username = request.body['username']
+    is_add = request.body['isAdd']
+    name = request.body['name']
+    system = current_app.db.session.query(current_app.System).filter_by(name=name).first()
+    if not system:
+        return NOT_EXISTENT_ID
+    l = current_app.get_ldap_connection()
+    user_entries = l.search_s(current_app.ldap_search_base,
+                              ldap.SCOPE_SUBTREE,
+                              current_app.ldap_search_pattern.format(
+                                  username=ldap.filter.escape_filter_chars(username)))
+    if not user_entries:  # user not found
+        current_app.logger.info('deny login request with username "{}". username not found.'.format(username))
+        return INVALID_USER
+    if len(user_entries) > 1:  # ambiguous username. not allow to login.
+        current_app.logger.warn('ambiguous username "{}". login request is deined.'.format(username))
+        return INVALID_USER
+    user_entry = user_entries[0]
+    user_dn = user_entry[0]
+    # FIXME: catch exception
+    l.modify_s(user_dn, [(ldap.MOD_ADD if is_add else ldap.MOD_DELETE, 'permissionRoleName', name.encode('utf-8'))])
+    return 0
+
+
 @bp.route('/delete', methods=('GET', 'POST'))
 @check_param
 @check_login
@@ -86,7 +116,7 @@ def delete():
     name = request.body['name']
     system = current_app.db.session.query(current_app.System).filter_by(name=name).first()
     if not system:
-        return NON_EXISTENT_ID
+        return NOT_EXISTENT_ID
     # FIXME: catch exception
     # remove from LDAP
     l = current_app.get_ldap_connection()

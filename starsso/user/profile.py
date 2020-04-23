@@ -19,7 +19,6 @@ def profile_modify():
     username = session['username']
     password = request.body.get('password')
     new_password = request.body.get('newPassword')
-    email = request.body.get('email')
     phone = request.body.get('phone')
     full_name = request.body.get('fullName')
     verify = request.body.get('verify')
@@ -40,7 +39,7 @@ def profile_modify():
     user_dn = user_entry[0]
 
     # sensitive information
-    if email or new_password or phone:
+    if new_password or phone:
         if isinstance(verify, str):
             # trans to int
             try:
@@ -64,16 +63,6 @@ def profile_modify():
     # TODO: generate modlist, modify entries
     # FIXME: catch exception
     modlist = []
-    if email:
-        # TODO: validate email
-        user_entries = l.search_s(current_app.ldap_search_base,
-                                  ldap.SCOPE_SUBTREE,
-                                  '(&(objectClass=person)(email={}))'.format(ldap.filter.escape_filter_chars(email)))
-        if len(user_entries):
-            return EXISTENT_EMAIL
-        if not validate_str([email]):
-            return INVALID_REQUEST
-        modlist.append((ldap.MOD_REPLACE, 'email', ldap.filter.escape_filter_chars(email).encode('utf-8')))
     if phone:
         if not validate_str([phone]):
             return INVALID_REQUEST

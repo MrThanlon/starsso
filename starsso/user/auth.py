@@ -172,9 +172,3 @@ def register():
     session['born'] = time.time()
     current_app.logger.info('user "{}" registered. (ldap dn: {})'.format(username, user_dn))
     return 0
-
-
-# @bp.route("/test", methods=('POST', 'GET'))
-# @check_param
-# def test():
-#    return request.body
