@@ -17,6 +17,8 @@ bp = Blueprint('systemd', __name__, url_prefix='/system')
 def add():
     name = request.body['name']
     url = request.body['url']
+    public = request.body['public']
+    public = 1 if public else 0
     if not validate_str([name, url]):
         return INVALID_REQUEST
     users = request.body.get('users')
@@ -35,7 +37,7 @@ def add():
         name_b = name.encode('utf-8')
         for dn in dns:
             l.modify_s(dn, [(ldap.MOD_ADD, 'permissionRoleName', name_b)])
-    system = current_app.System(name, url)
+    system = current_app.System(name, url, public)
     system.add()
     return 0
 
@@ -49,6 +51,7 @@ def modify():
     name = request.body['name']
     url = request.body.get('url')
     users = request.body.get('users')
+    public = request.body.get('public')
     if not validate_str([name]):
         return INVALID_REQUEST
     system = current_app.db.session.query(current_app.System).filter_by(name=name).first()
@@ -73,6 +76,8 @@ def modify():
 
     if url != None:
         system.url = url
+    if public != None:
+        system.public = 1 if public else 0
     # FIXME: catch exception
     current_app.db.session.add(system)
     current_app.db.session.commit()
@@ -145,5 +150,5 @@ def get():
                                   '(&(objectClass=person)(permissionRoleName={system}))'.format(
                                       system=ldap.filter.escape_filter_chars(s.name)))
         users = list(map(lambda x: x[1]['cn'][0].decode('utf-8'), user_entries))
-        ans.append({'name': s.name, 'url': s.url, 'users': users})
+        ans.append({'name': s.name, 'url': s.url, 'users': users, 'public': s.public == 1})
     return ans

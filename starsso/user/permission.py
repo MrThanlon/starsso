@@ -31,9 +31,10 @@ def permission():
 
     user_entry = user_entries[0]
     attrs = user_entry[1]
-    ans = attrs.get('permissionRoleName')
-    if not ans:
-        ans = []
-    systems = current_app.db.session.query(current_app.System).all()
-    system_url = {s.name: s.url for s in systems}
-    return list(map(lambda x: {'name': x.decode('utf-8'), 'url': system_url.get(x.decode('utf-8'))}, ans))
+    ans = {x.decode('utf-8') for x in attrs.get('permissionRoleName')}
+    systems = current_app.db.session.query(current_app.System).filter(
+        current_app.db.or_(
+            current_app.System.name.in_(ans),
+            current_app.System.public == 1
+        ))
+    return [{'name': s.name, 'url': s.url, 'isGrant': s.name in ans} for s in systems]

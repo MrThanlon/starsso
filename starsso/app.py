@@ -64,7 +64,7 @@ def register_db(app):
     class System(db.Model):
         __tablename__ = 'system'
 
-        def __init__(self, name, url=''):
+        def __init__(self, name, url='', public=True):
             self.name = name
             self.url = url
 
@@ -176,6 +176,7 @@ def create_app():
     @app.route('/<path:filename>')
     def static_file(filename):
         return send_from_directory(app.static_folder, filename)
+
     return app
 
 
