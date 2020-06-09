@@ -105,10 +105,11 @@
 
 *注意：返回的数据是一个数组，每个元素的字段如下：*
 
-| 字段名 | 必填 |  类型  |   说明   |
-| :----: | :--: | :----: | :------: |
-|  name  |  是  | String | 系统名称 |
-|  url   |  是  | String |   链接   |
+| 字段名  | 必填 |  类型   |    说明    |
+| :-----: | :--: | :-----: | :--------: |
+|  name   |  是  | String  |  系统名称  |
+|   url   |  是  | String  |    链接    |
+| isGrant |  是  | Boolean | 是否有权限 |
 
 返回示例：
 
@@ -119,7 +120,8 @@
   "data": [
     {
       "name": "VPN",
-      "url": "https://vpn.starstudio.org/"
+      "url": "https://vpn.starstudio.org/",
+      "isGrant": true
     },
     ...
   ]
@@ -134,11 +136,12 @@
 
 请求参数：
 
-| 字段名 | 必填 |  类型  |          说明           |
-| :----: | :--: | :----: | :---------------------: |
-|  name  |  是  | String | 系统名称，不允许为admin |
-|  url   |  是  | String |        系统名称         |
-| users  |  否  | Array  |     授权的用户列表      |
+| 字段名 | 必填 |  类型   |          说明           |
+| :----: | :--: | :-----: | :---------------------: |
+|  name  |  是  | String  | 系统名称，不允许为admin |
+|  url   |  是  | String  |        系统名称         |
+| users  |  否  |  Array  |     授权的用户列表      |
+| public |  是  | Boolean |        是否公开         |
 
 #### 修改系统及分配权限 - `/admin/system/modify`
 
@@ -146,11 +149,12 @@
 
 请求参数：
 
-| 字段名 | 必填 |  类型  |      说明      |
-| :----: | :--: | :----: | :------------: |
-|  name  |  是  | String |    系统名称    |
-|  url   |  否  | String |    系统链接    |
-| users  |  否  | Array  | 授权的用户列表 |
+| 字段名 | 必填 |  类型   |      说明      |
+| :----: | :--: | :-----: | :------------: |
+|  name  |  是  | String  |    系统名称    |
+|  url   |  否  | String  |    系统链接    |
+| users  |  否  |  Array  | 授权的用户列表 |
+| public |  否  | Boolean |    是否公开    |
 
 #### 删除系统 - `/admin/system/delete`
 
@@ -164,11 +168,12 @@
 
 *注意：返回的数据是一个数组，每个元素的字段如下：*
 
-| 字段名 | 必填 |  类型  |          说明          |
-| :----: | :--: | :----: | :--------------------: |
-|  name  |  是  | String |        系统名称        |
-|  url   |  是  | String |        系统链接        |
-| users  |  是  | Array  | 用户列表，元素为登录名 |
+| 字段名 | 必填 |  类型   |          说明          |
+| :----: | :--: | :-----: | :--------------------: |
+|  name  |  是  | String  |        系统名称        |
+|  url   |  是  | String  |        系统链接        |
+| users  |  是  |  Array  | 用户列表，元素为登录名 |
+| public |  是  | Boolean |        是否公开        |
 
 返回示例：
 
@@ -183,12 +188,14 @@
       "users": [
         "abc@example.com",
         "efg@example.com"
-      ]
+      ],
+  		"public": true
     },
     {
       "name": "Graylog",
       "url": "http://graylog.starstudio.org/",
-      "users":[]
+      "users":[],
+      "public": false
     },
     ...
   ]
