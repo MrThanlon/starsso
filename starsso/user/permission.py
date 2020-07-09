@@ -31,7 +31,7 @@ def permission():
 
     user_entry = user_entries[0]
     attrs = user_entry[1]
-    ans = {x.decode('utf-8') for x in attrs.get('permissionRoleName')}
+    ans = {x.decode('utf-8') for x in attrs.get(current_app.ldap_attr_permission)}
     systems = current_app.db.session.query(current_app.System).filter(
         current_app.db.or_(
             current_app.System.name.in_(ans),

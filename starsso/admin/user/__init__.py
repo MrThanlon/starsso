@@ -54,10 +54,10 @@ def get():
     l = current_app.get_ldap_connection()
     user_entries = l.search_s(current_app.ldap_search_base, ldap.SCOPE_SUBTREE, '(objectClass=person)')
     ans = [{
-        'username': x[1]['cn'][0].decode('utf-8'),
-        'fullName': x[1]['fullName'][0].decode('utf-8'),
-        'email': x[1]['email'][0].decode('utf-8'),
-        'admin': b'admin' in x[1].get('permissionRoleName')
+        'username': x[1][current_app.ldap_attr_username][0].decode('utf-8'),
+        current_app.ldap_attr_name: x[1][current_app.ldap_attr_name][0].decode('utf-8'),
+        'email': x[1][current_app.ldap_attr_email][0].decode('utf-8'),
+        'admin': b'admin' in x[1].get(current_app.ldap_attr_permission)
     } for x in user_entries]
     return ans
 
@@ -126,16 +126,16 @@ def modify():
     if full_name:
         if not validate_str([full_name]):
             return INVALID_REQUEST
-        modlist.append((ldap.MOD_REPLACE, 'fullName', ldap.filter.escape_filter_chars(full_name).encode('utf-8')))
+        modlist.append((ldap.MOD_REPLACE, current_app.ldap_attr_name, ldap.filter.escape_filter_chars(full_name).encode('utf-8')))
     if phone:
         if not validate_str([phone]):
             return INVALID_REQUEST
-        modlist.append((ldap.MOD_REPLACE, 'telephoneNumber', ldap.filter.escape_filter_chars(phone).encode('utf-8')))
+        modlist.append((ldap.MOD_REPLACE, current_app.ldap_attr_phone, ldap.filter.escape_filter_chars(phone).encode('utf-8')))
     if admin:
-        if admin == 'True' and (b'admin' not in attrs.get('permissionRoleName')):
-            modlist.append((ldap.MOD_ADD, 'permissionRoleName', b'admin'))
-        elif b'admin' in attrs.get('permissionRoleName'):
-            modlist.append((ldap.MOD_DELETE, 'permissionRoleName', b'admin'))
+        if admin == 'True' and (b'admin' not in attrs.get(current_app.ldap_attr_permission)):
+            modlist.append((ldap.MOD_ADD, current_app.ldap_attr_permission, b'admin'))
+        elif b'admin' in attrs.get(current_app.ldap_attr_permission):
+            modlist.append((ldap.MOD_DELETE, current_app.ldap_attr_permission, b'admin'))
     if modlist:
         l.modify_s(user_dn, modlist)
     return 0

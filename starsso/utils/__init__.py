@@ -201,7 +201,7 @@ def check_admin(f):
             return INVALID_USER, 'Duplicated users found. The users are blocked for security reason. Consult administrator to get help.'
         user_entry = user_entries[0]
         attrs = user_entry[1]
-        if b'admin' not in attrs.get('permissionRoleName'):
+        if b'admin' not in attrs.get(current_app.ldap_attr_permission):
             current_app.logger.warn('None-admin user request admin API, denied.'.format(username))
             return NOT_ADMIN
         return f()

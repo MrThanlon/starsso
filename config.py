@@ -33,6 +33,12 @@ LDAP_ROOT_BIND_DN = 'cn=admin,dc=nodomain'
 LDAP_PASSWORD = 'huangziyi.1970'
 LDAP_SEARCH_PATTERN = '(&(objectClass=person)(cn={username}))'  # 一定要 escaped 和 validate ，小心注入
 LDAP_SEARCH_BASE = 'ou=starstudio,dc=nodomain'
+LDAP_ATTR_EMAIL = 'email'
+LDAP_ATTR_PHONE = 'telephoneNumber'
+LDAP_ATTR_USERNAME = 'cn'
+LDAP_ATTR_NAME = 'fullName'
+LDAP_ATTR_PERMISSION = 'permissionRoleName'
+
 
 # SMTP
 SMTP_HOST = 'smtp.qq.com'

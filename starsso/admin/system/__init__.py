@@ -25,7 +25,9 @@ def add():
     if users:
         l = current_app.get_ldap_connection()
         filter_str = '(&(objectClass=person)(|{}))'.format(
-            reduce(lambda x, y: x + '(cn={})'.format(ldap.filter.escape_filter_chars(y)), users, ''))
+            reduce(
+                lambda x, y: x + '({}={})'.format(current_app.ldap_attr_username, ldap.filter.escape_filter_chars(y)),
+                users, ''))
         user_entries = l.search_s(current_app.ldap_search_base,
                                   ldap.SCOPE_SUBTREE,
                                   filter_str)
@@ -36,7 +38,7 @@ def add():
         # FIXME: catch exception
         name_b = name.encode('utf-8')
         for dn in dns:
-            l.modify_s(dn, [(ldap.MOD_ADD, 'permissionRoleName', name_b)])
+            l.modify_s(dn, [(ldap.MOD_ADD, current_app.ldap_attr_permission, name_b)])
     system = current_app.System(name, url, public)
     system.add()
     return 0
@@ -61,7 +63,9 @@ def modify():
     if users:
         l = current_app.get_ldap_connection()
         filter_str = '(&(objectClass=person)(|{}))'.format(
-            reduce(lambda x, y: x + '(cn={})'.format(ldap.filter.escape_filter_chars(y)), users, ''))
+            reduce(
+                lambda x, y: x + '({}={})'.format(current_app.ldap_attr_username, ldap.filter.escape_filter_chars(y)),
+                users, ''))
         user_entries = l.search_s(current_app.ldap_search_base,
                                   ldap.SCOPE_SUBTREE,
                                   filter_str)
@@ -72,7 +76,7 @@ def modify():
         # FIXME: catch exception
         name_b = system.name.encode('utf-8')
         for dn in dns:
-            l.modify_s(dn, [(ldap.MOD_ADD, 'permissionRoleName', name_b)])
+            l.modify_s(dn, [(ldap.MOD_ADD, current_app.ldap_attr_permission, name_b)])
 
     if url != None:
         system.url = url
@@ -109,7 +113,8 @@ def modify_permission():
     user_entry = user_entries[0]
     user_dn = user_entry[0]
     # FIXME: catch exception
-    l.modify_s(user_dn, [(ldap.MOD_ADD if is_add else ldap.MOD_DELETE, 'permissionRoleName', name.encode('utf-8'))])
+    l.modify_s(user_dn,
+               [(ldap.MOD_ADD if is_add else ldap.MOD_DELETE, current_app.ldap_attr_permission, name.encode('utf-8'))])
     return 0
 
 
@@ -126,11 +131,12 @@ def delete():
     # remove from LDAP
     l = current_app.get_ldap_connection()
     user_entries = l.search_s(current_app.ldap_search_base, ldap.SCOPE_SUBTREE,
-                              '(&(objectClass=person)(permissionRoleName={name}))'.format(
-                                  name=ldap.filter.escape_filter_chars(system.name)))
+                              '(&(objectClass=person)({}={}))'.format(
+                                  current_app.ldap_attr_permission,
+                                  ldap.filter.escape_filter_chars(system.name)))
     name_b = system.name.encode('utf-8')
     for u in user_entries:
-        l.modify_s(u[0], [(ldap.MOD_DELETE, 'permissionRoleName', name_b)])
+        l.modify_s(u[0], [(ldap.MOD_DELETE, current_app.ldap_attr_permission, name_b)])
     current_app.db.session.delete(system)
     current_app.db.session.commit()
     return 0
@@ -147,8 +153,10 @@ def get():
     for s in systems:
         user_entries = l.search_s(current_app.ldap_search_base,
                                   ldap.SCOPE_SUBTREE,
-                                  '(&(objectClass=person)(permissionRoleName={system}))'.format(
-                                      system=ldap.filter.escape_filter_chars(s.name)))
-        users = list(map(lambda x: x[1]['cn'][0].decode('utf-8'), user_entries))
+                                  '(&(objectClass=person)({}={}))'.format(
+                                      current_app.ldap_attr_permission,
+                                      ldap.filter.escape_filter_chars(s.name)
+                                  ))
+        users = list(map(lambda x: x[1][current_app.ldap_attr_username][0].decode('utf-8'), user_entries))
         ans.append({'name': s.name, 'url': s.url, 'users': users, 'public': s.public == 1})
     return ans

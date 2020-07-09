@@ -66,11 +66,11 @@ def profile_modify():
     if phone:
         if not validate_str([phone]):
             return INVALID_REQUEST
-        modlist.append((ldap.MOD_REPLACE, 'telephoneNumber', ldap.filter.escape_filter_chars(phone).encode('utf-8')))
+        modlist.append((ldap.MOD_REPLACE, current_app.ldap_attr_phone, ldap.filter.escape_filter_chars(phone).encode('utf-8')))
     if full_name:
         if not validate_str([full_name]):
             return INVALID_REQUEST
-        modlist.append((ldap.MOD_REPLACE, 'fullName', ldap.filter.escape_filter_chars(full_name).encode('utf-8')))
+        modlist.append((ldap.MOD_REPLACE, current_app.ldap_attr_name, ldap.filter.escape_filter_chars(full_name).encode('utf-8')))
     if modlist:
         l.modify_s(user_dn, modlist)
     if new_password:
@@ -98,8 +98,8 @@ def profile():
     attrs = user_entry[1]
     return {
         "username": username,
-        "email": attrs['email'][0].decode('utf-8'),
-        "phone": attrs.get('telephoneNumber')[0].decode('utf-8'),
-        "fullName": attrs.get('fullName')[0].decode('utf-8'),
-        "admin": b'admin' in attrs.get('permissionRoleName')
+        "email": attrs[current_app.ldap_attr_email][0].decode('utf-8'),
+        "phone": attrs.get(current_app.ldap_attr_phone)[0].decode('utf-8'),
+        "fullName": attrs.get(current_app.ldap_attr_name)[0].decode('utf-8'),
+        "admin": b'admin' in attrs.get(current_app.ldap_attr_permission)
     }

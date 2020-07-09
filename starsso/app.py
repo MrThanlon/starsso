@@ -128,6 +128,22 @@ def load_configuration(app):
     if not app.ldap_search_base:
         raise "LDAP_SEARCH_BASE missing."
 
+    app.ldap_attr_email = app.config.get('LDAP_ATTR_EMAIL', '')
+    if not app.ldap_attr_email:
+        raise "LDAP_ATTR_EMAIL missing."
+    app.ldap_attr_phone = app.config.get('LDAP_ATTR_PHONE', '')
+    if not app.ldap_attr_phone:
+        raise "LDAP_ATTR_PHONE missing."
+    app.ldap_attr_username = app.config.get('LDAP_ATTR_USERNAME', '')
+    if not app.ldap_attr_username:
+        raise "LDAP_ATTR_USERNAME missing."
+    app.ldap_attr_name = app.config.get('LDAP_ATTR_NAME', '')
+    if not app.ldap_attr_name:
+        raise "LLDAP_ATTR_NAME missing."
+    app.ldap_attr_permission = app.config.get('LDAP_ATTR_PERMISSION', '')
+    if not app.ldap_attr_permission:
+        raise "LDAP_ATTR_PERMISSION missing."
+
     # ???? wtf
     app.response_class = APIResponse
     app.request_class = APIRequest

@@ -61,7 +61,7 @@ def login():
     session['username'] = username
     session['login'] = True
     session['born'] = time.time()
-    if b'admin' in attrs.get('permissionRoleName'):
+    if b'admin' in attrs.get(current_app.ldap_attr_permission):
         session['admin'] = True
     else:
         session['admin'] = False
@@ -105,15 +105,16 @@ def validation_code():
     attrs = user_entry[1]
     if request.body.get('email'):
         # query email
-        if not send_email(attrs['email'][0].decode('utf-8'), code, username):
+        if not send_email(attrs[current_app.ldap_attr_email][0].decode('utf-8'), code, username):
             current_app.logger.error(
-                'Failed to send email, {}, check configuration.'.format(attrs['email'][0].decode('utf-8')))
+                'Failed to send email, {}, check configuration.'.format(
+                    attrs[current_app.ldap_attr_email][0].decode('utf-8')))
             return EMAIL_FAILED
     elif request.body.get('phone'):
-        if not send_sms(attrs['telephoneNumber'][0].decode('utf-8'), code):
+        if not send_sms(attrs[current_app.ldap_attr_phone][0].decode('utf-8'), code):
             current_app.logger.error(
                 'Failed to send SMS, phone: {}, check configuration.'.format(
-                    attrs['telephoneNumber'][0].decode('utf-8')))
+                    attrs[current_app.ldap_attr_phone][0].decode('utf-8')))
             return SMS_FAILED
 
     # set session
@@ -129,7 +130,7 @@ def register():
     code = request.body['inviteCode']
     username = request.body['username']
     password = request.body['password']
-    full_name = request.body['fullName']
+    full_name = request.body[current_app.ldap_attr_name]
     email = request.body['email']
     # validate
     if not validate_str([code, username, password, full_name, email]):
@@ -159,8 +160,8 @@ def register():
     user_dn = 'cn={},'.format(ldap.dn.escape_dn_chars(username)) + config.LDAP_SEARCH_BASE
     # register
     l.add_s(user_dn, [('objectClass', [b'organizationalPerson', b'person', b'starstudioMember', b'top']),
-                      ('email', email.encode('utf-8')),
-                      ('fullName', full_name.encode('utf-8'))])
+                      (current_app.ldap_attr_email, email.encode('utf-8')),
+                      (current_app.ldap_attr_name, full_name.encode('utf-8'))])
     l.passwd_s(user_dn, None, password.encode('ascii'))
     # remove code
     current_app.db.session.delete(token)
