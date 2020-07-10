@@ -40,6 +40,8 @@ def profile_modify():
 
     # sensitive information
     if new_password or phone:
+        if not password:
+            return INVALID_REQUEST
         if isinstance(verify, str):
             # trans to int
             try:
@@ -66,11 +68,13 @@ def profile_modify():
     if phone:
         if not validate_str([phone]):
             return INVALID_REQUEST
-        modlist.append((ldap.MOD_REPLACE, current_app.ldap_attr_phone, ldap.filter.escape_filter_chars(phone).encode('utf-8')))
+        modlist.append(
+            (ldap.MOD_REPLACE, current_app.ldap_attr_phone, ldap.filter.escape_filter_chars(phone).encode('utf-8')))
     if full_name:
         if not validate_str([full_name]):
             return INVALID_REQUEST
-        modlist.append((ldap.MOD_REPLACE, current_app.ldap_attr_name, ldap.filter.escape_filter_chars(full_name).encode('utf-8')))
+        modlist.append(
+            (ldap.MOD_REPLACE, current_app.ldap_attr_name, ldap.filter.escape_filter_chars(full_name).encode('utf-8')))
     if modlist:
         l.modify_s(user_dn, modlist)
     if new_password:
@@ -96,17 +100,13 @@ def profile():
         return UNKNOWN_ERROR
     user_entry = user_entries[0]
     attrs = user_entry[1]
-    email = attrs[current_app.ldap_attr_email][0].decode('utf-8')
-    phone = attrs.get(current_app.ldap_attr_phone)
-    if phone:
-        phone = phone[0].decode('utf-8')
-    full_name = attrs.get(current_app.ldap_attr_name)
-    if full_name:
-        full_name = full_name[0].decode('utf-8')
     return {
         "username": username,
-        "email": email,
-        "phone": phone,
-        "fullName": full_name,
+        "email": attrs[current_app.ldap_attr_email][0].decode('utf-8')
+        if current_app.ldap_attr_email in attrs else None,
+        "phone": attrs[current_app.ldap_attr_phone][0].decode('utf-8')
+        if current_app.ldap_attr_phone in attrs else None,
+        "fullName": attrs[current_app.ldap_attr_name][0].decode('utf-8')
+        if current_app.ldap_attr_name in attrs else None,
         "admin": b'admin' in attrs.get(current_app.ldap_attr_permission)
     }

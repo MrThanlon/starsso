@@ -119,7 +119,7 @@ def validation_code():
 
     # set session
     session['validation_code'] = code
-    session['validation_expire'] = time.time() + config.VALIDATION_EXPIRATION
+    session['validation_expire'] = time.time() + current_app.validation_expiration
     return 0
 
 

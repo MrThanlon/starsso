@@ -186,3 +186,16 @@ TypeError: 'NoneType' object is not subscriptable
 [2020-07-10 14:40:33,050] INFO in auth: user "hzy" logined. (ldap dn: cn=hzy,ou=starstudio,dc=nodomain)
 [2020-07-10 14:44:01,839] INFO in auth: login with username hzy. invalid password.
 [2020-07-10 14:44:04,690] INFO in auth: user "hzy" logined. (ldap dn: cn=hzy,ou=starstudio,dc=nodomain)
+[2020-07-10 16:07:05,118] INFO in auth: user "hzy" logined. (ldap dn: cn=hzy,ou=starstudio,dc=nodomain)
+[2020-07-10 16:23:33,169] INFO in auth: user "mxt" logined. (ldap dn: cn=mxt,ou=starstudio,dc=nodomain)
+[2020-07-10 16:23:56,655] INFO in auth: user "mxt" logined. (ldap dn: cn=mxt,ou=starstudio,dc=nodomain)
+[2020-07-10 16:25:06,456] INFO in auth: user "mxt" logined. (ldap dn: cn=mxt,ou=starstudio,dc=nodomain)
+[2020-07-10 16:29:21,772] INFO in auth: user "test" logined. (ldap dn: cn=test,ou=starstudio,dc=nodomain)
+[2020-07-10 16:29:21,991] WARNING in __init__: 'email'
+[2020-07-10 16:29:59,003] INFO in auth: user "test" logined. (ldap dn: cn=test,ou=starstudio,dc=nodomain)
+[2020-07-10 16:29:59,164] WARNING in __init__: 'email'
+[2020-07-10 16:34:43,641] INFO in auth: user "test" logined. (ldap dn: cn=test,ou=starstudio,dc=nodomain)
+[2020-07-10 16:34:55,776] WARNING in __init__: 'email'
+[2020-07-10 16:38:32,647] INFO in auth: user "test" logined. (ldap dn: cn=test,ou=starstudio,dc=nodomain)
+[2020-07-10 16:42:29,238] INFO in auth: user "hzy" logined. (ldap dn: cn=hzy,ou=starstudio,dc=nodomain)
+[2020-07-10 16:42:40,484] INFO in auth: user "mxt" logined. (ldap dn: cn=mxt,ou=starstudio,dc=nodomain)

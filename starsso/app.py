@@ -96,6 +96,8 @@ def load_configuration(app):
     config_file = os.path.abspath(os.environ.get('STARSSO_CONFIG_FILE', 'config.py'))
     app.config.from_pyfile(filename=config_file)
 
+    app.validation_expiration = app.config.get('VALIDATION_EXPIRATION', 300)
+
     # DB
     app.db_host = app.config.get('DATABASE_HOST')
     if not app.db_host:
