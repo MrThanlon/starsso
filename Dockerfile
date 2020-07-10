@@ -6,7 +6,6 @@ RUN set -xe;\
     apk update;\
     apk add openldap-dev gcc python3 python3-dev alpine-sdk git nodejs-npm --no-cache;\
     cd /app;\
-    envsubst < config.py.template > config.py;\
     pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple;\
     mkdir starsso/static;\
     mkdir /build;\
