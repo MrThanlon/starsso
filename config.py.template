@@ -22,15 +22,15 @@ SQLALCHEMY_TRACK_MODIFICATIONS = True
 SQLALCHEMY_COMMIT_TEARDOWN = True
 
 # LDAP
-LDAP_URI = 'ldap://47.103.204.9'
-LDAP_ROOT_BIND_DN = 'cn=admin,dc=nodomain'
-LDAP_PASSWORD = 'huangziyi.1970'
-LDAP_SEARCH_PATTERN = '(&(objectClass=person)(cn={username}))'  # 一定要 escaped 和 validate ，小心注入
-LDAP_SEARCH_BASE = 'ou=starstudio,dc=nodomain'
-LDAP_ATTR_EMAIL = 'email'
+LDAP_URI = 'ldap://10.240.5.3'
+LDAP_ROOT_BIND_DN = 'cn=admin,dc=starstudio,dc=com'
+LDAP_PASSWORD = '${LDAP_PASSWORD}'
+LDAP_SEARCH_PATTERN = '(&(objectClass=person)(cn={username}))'
+LDAP_SEARCH_BASE = 'ou=gitlab2,dc=starstudio,dc=com'
+LDAP_ATTR_EMAIL = 'postalAddress'
 LDAP_ATTR_PHONE = 'telephoneNumber'
 LDAP_ATTR_USERNAME = 'cn'
-LDAP_ATTR_NAME = 'fullName'
+LDAP_ATTR_NAME = 'sn'
 LDAP_ATTR_PERMISSION = 'permissionRoleName'
 
 # SMTP
