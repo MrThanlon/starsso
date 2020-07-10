@@ -48,7 +48,7 @@ def profile_modify():
                 return INVALID_REQUEST
         if not isinstance(verify, int):
             return INVALID_REQUEST
-        if verify != session['validation_code'] or session['validation_expire'] > time.time():
+        if verify != session['validation_code'] or session['validation_expire'] < time.time():
             return -30
         # re-bind according to user dn.
         if not validate_str([password]):
@@ -81,7 +81,7 @@ def profile_modify():
     return OK
 
 
-@bp.route("/profile", methods=('GET', 'POST'))
+@bp.route("/profile", methods=('POST', 'GET'))
 @check_param
 @check_login
 def profile():
@@ -96,10 +96,17 @@ def profile():
         return UNKNOWN_ERROR
     user_entry = user_entries[0]
     attrs = user_entry[1]
+    email = attrs[current_app.ldap_attr_email][0].decode('utf-8')
+    phone = attrs.get(current_app.ldap_attr_phone)
+    if phone:
+        phone = phone[0].decode('utf-8')
+    full_name = attrs.get(current_app.ldap_attr_name)
+    if full_name:
+        full_name = full_name[0].decode('utf-8')
     return {
         "username": username,
-        "email": attrs[current_app.ldap_attr_email][0].decode('utf-8'),
-        "phone": attrs.get(current_app.ldap_attr_phone)[0].decode('utf-8'),
-        "fullName": attrs.get(current_app.ldap_attr_name)[0].decode('utf-8'),
+        "email": email,
+        "phone": phone,
+        "fullName": full_name,
         "admin": b'admin' in attrs.get(current_app.ldap_attr_permission)
     }

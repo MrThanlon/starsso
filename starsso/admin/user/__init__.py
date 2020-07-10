@@ -55,9 +55,10 @@ def get():
     user_entries = l.search_s(current_app.ldap_search_base, ldap.SCOPE_SUBTREE, '(objectClass=person)')
     ans = [{
         'username': x[1][current_app.ldap_attr_username][0].decode('utf-8'),
-        current_app.ldap_attr_name: x[1][current_app.ldap_attr_name][0].decode('utf-8'),
-        'email': x[1][current_app.ldap_attr_email][0].decode('utf-8'),
-        'admin': b'admin' in x[1].get(current_app.ldap_attr_permission)
+        'fullName': x[1][current_app.ldap_attr_name][0].decode('utf-8') if current_app.ldap_attr_name in x[1] else None,
+        'email': x[1][current_app.ldap_attr_email][0].decode('utf-8') if current_app.ldap_attr_email in x[1] else None,
+        'admin':
+            b'admin' in x[1][current_app.ldap_attr_permission] if current_app.ldap_attr_permission in x[1] else False
     } for x in user_entries]
     return ans
 

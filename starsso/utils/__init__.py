@@ -114,6 +114,8 @@ class APIRequest(Request):
                 self.body = self.get_json()
             elif self.content_type == 'application/x-www-form-urlencoded':
                 self.body = self.form.to_dict()
+            elif self.content_type is None:
+                self.body = {}
             elif self.content_type.startswith('multipart/form-data'):
                 # FIXME: file content
                 self.body = self.form.to_dict()
