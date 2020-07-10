@@ -199,3 +199,7 @@ TypeError: 'NoneType' object is not subscriptable
 [2020-07-10 16:38:32,647] INFO in auth: user "test" logined. (ldap dn: cn=test,ou=starstudio,dc=nodomain)
 [2020-07-10 16:42:29,238] INFO in auth: user "hzy" logined. (ldap dn: cn=hzy,ou=starstudio,dc=nodomain)
 [2020-07-10 16:42:40,484] INFO in auth: user "mxt" logined. (ldap dn: cn=mxt,ou=starstudio,dc=nodomain)
+[2020-07-10 22:03:59,986] WARNING in __init__: username 1 not found, fatal error.
+[2020-07-10 22:04:03,444] WARNING in __init__: username 1 not found, fatal error.
+[2020-07-10 22:04:47,718] INFO in auth: deny login request with username "1". username not found.
+[2020-07-10 22:06:07,443] INFO in auth: user "hzy" logined. (ldap dn: cn=hzy,ou=starstudio,dc=nodomain)

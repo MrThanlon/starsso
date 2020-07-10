@@ -120,20 +120,20 @@ def modify():
     attrs = user_entry[1]
     # FIXME: catch exception
     modlist = []
-    if password:
+    if password is not None:
         if not validate_str([password]):
             return INVALID_REQUEST
         l.passwd_s(user_dn, None, password.encode('ascii'))
-    if full_name:
+    if full_name is not None:
         if not validate_str([full_name]):
             return INVALID_REQUEST
         modlist.append((ldap.MOD_REPLACE, current_app.ldap_attr_name, ldap.filter.escape_filter_chars(full_name).encode('utf-8')))
-    if phone:
+    if phone is not None:
         if not validate_str([phone]):
             return INVALID_REQUEST
         modlist.append((ldap.MOD_REPLACE, current_app.ldap_attr_phone, ldap.filter.escape_filter_chars(phone).encode('utf-8')))
-    if admin:
-        if admin == 'True' and (b'admin' not in attrs.get(current_app.ldap_attr_permission)):
+    if admin is not None:
+        if admin is True and (b'admin' not in attrs.get(current_app.ldap_attr_permission)):
             modlist.append((ldap.MOD_ADD, current_app.ldap_attr_permission, b'admin'))
         elif b'admin' in attrs.get(current_app.ldap_attr_permission):
             modlist.append((ldap.MOD_DELETE, current_app.ldap_attr_permission, b'admin'))
