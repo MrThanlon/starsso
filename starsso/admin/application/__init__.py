@@ -45,7 +45,8 @@ def application_operate():
     system_name_b = system_name.encode('utf-8')
     if accept and (system_name_b not in attrs):
         # grant
-        l.modify_s(user_dn, [(ldap.MOD_ADD, app.ldap_attr_permission, system_name_b)])
+        l.modify_s(user_dn, [(ldap.MOD_ADD, current_app.ldap_attr_permission, system_name_b)])
 
     current_app.db.session.delete(app)
+    current_app.db.session.commit()
     return OK
