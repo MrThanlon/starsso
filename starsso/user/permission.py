@@ -40,7 +40,7 @@ def permission():
     return [{'name': s.name, 'url': s.url, 'isGrant': s.name in ans} for s in systems]
 
 
-@bp.route("/permission/apply", methods=('GET', 'POST'))
+@bp.route("/permission/request", methods=('GET', 'POST'))
 @check_param
 @check_login
 @check_username

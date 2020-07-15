@@ -132,7 +132,7 @@
 }
 ```
 
-#### 申请权限 - `/user/permission/apply`
+#### 申请权限 - `/user/permission/request`
 
 请求参数：
 
@@ -218,11 +218,11 @@
 
 请求参数：
 
-|  字段名  | 必填 |  类型   |   说明   |
-| :------: | :--: | :-----: | :------: |
-| username |  否  | String  |  用户名  |
-|  isAdd   |  否  | Boolean |  手机号  |
-|   name   |  是  | String  | 系统名称 |
+|  字段名  | 必填 |  类型   |         说明         |
+| :------: | :--: | :-----: | :------------------: |
+| username |  否  | String  |        用户名        |
+|  isAdd   |  否  | Boolean | true.添加/false.删除 |
+|   name   |  是  | String  |       系统名称       |
 
 #### 新用户邀请 - `/admin/user/invite`
 
