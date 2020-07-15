@@ -1,12 +1,12 @@
 # coding: utf-8
 
-from flask import Blueprint, session, current_app
+from flask import Blueprint, session, current_app, request
 from functools import reduce
 import ldap
 import ldap.filter
 
 from starsso.utils import check_param, check_login, UNKNOWN_ERROR, send_sms, SMS_FAILED, DUPLICATED_USERNAME, \
-    INVALID_USER, OK
+    INVALID_USER, OK, check_username, NOT_EXISTENT_NAME
 
 bp = Blueprint('user_permission_api', __name__)
 
@@ -38,3 +38,19 @@ def permission():
             current_app.System.public == 1
         ))
     return [{'name': s.name, 'url': s.url, 'isGrant': s.name in ans} for s in systems]
+
+
+@bp.route("/permission/apply", methods=('GET', 'POST'))
+@check_param
+@check_login
+@check_username
+def permission_apply():
+    system_name = request.body['name']
+    username = session['username']
+    # check system_name
+    system = current_app.db.session.query(current_app.System).filter_by(name=system_name).first()
+    if not system:
+        return NOT_EXISTENT_NAME
+    # insert
+    current_app.Application(username, system_name).add()
+    return OK

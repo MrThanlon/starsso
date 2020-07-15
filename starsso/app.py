@@ -67,6 +67,7 @@ def register_db(app):
         def __init__(self, name, url='', public=True):
             self.name = name
             self.url = url
+            self.public = public
 
         def add(self):
             db.session.add(self)
@@ -82,9 +83,21 @@ def register_db(app):
             db.session.add(self)
             return db.session.commit()
 
+    class Application(db.Model):
+        __tablename__ = 'application'
+
+        def __init__(self, username, name):
+            self.username = username
+            self.name = name
+
+        def add(self):
+            db.session.add(self)
+            return db.session.commit()
+
     app.db = db
     app.System = System
     app.Invite = Invite
+    app.Application = Application
 
 
 def register_routes(app):

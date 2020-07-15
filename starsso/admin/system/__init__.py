@@ -1,6 +1,7 @@
 from flask import Blueprint, request, current_app
 from starsso.utils import check_param, check_login, UNKNOWN_ERROR, send_sms, SMS_FAILED, DUPLICATED_USERNAME, \
-    send_email, check_admin, NOT_EXISTENT_ID, INVALID_USER, INCLUDE_NON_EXISTENT_USERNAME, validate_str, INVALID_REQUEST
+    send_email, check_admin, NOT_EXISTENT_ID, INVALID_USER, INCLUDE_NON_EXISTENT_USERNAME, validate_str, \
+    INVALID_REQUEST, DUPLICATED_NAME
 
 import ldap
 import ldap.filter
@@ -22,6 +23,10 @@ def add():
     if not validate_str([name, url]):
         return INVALID_REQUEST
     users = request.body.get('users')
+    # FIXME: check system_name
+    system = current_app.db.session.query(current_app.System).filter_by(name=name).first()
+    if system:
+        return DUPLICATED_NAME
     if users:
         l = current_app.get_ldap_connection()
         filter_str = '(&(objectClass=person)(|{}))'.format(

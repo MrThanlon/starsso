@@ -29,10 +29,12 @@ ALREADY_LOGINED = -2
 SMS_FAILED = -40
 EMAIL_FAILED = -41
 DUPLICATED_USERNAME = -42
+DUPLICATED_NAME = -43
 NOT_ADMIN = -51
 NOT_EXISTENT_ID = -53
 INCLUDE_NON_EXISTENT_USERNAME = -55
 EXISTENT_EMAIL = -57
+NOT_EXISTENT_NAME = -59
 UNKNOWN_ERROR = -100
 
 ERROR_MESSAGES = {
@@ -48,10 +50,12 @@ ERROR_MESSAGES = {
     SMS_FAILED: 'failed to send sms',
     EMAIL_FAILED: 'failed to send email',
     DUPLICATED_USERNAME: 'duplicated username',
+    DUPLICATED_NAME: 'duplicated name',
     NOT_ADMIN: 'not admin',
     NOT_EXISTENT_ID: 'non-existent ID',
     INCLUDE_NON_EXISTENT_USERNAME: 'users list includes non-existent username',
     EXISTENT_EMAIL: 'existent email address',
+    NOT_EXISTENT_NAME: 'non-existent name',
     UNKNOWN_ERROR: 'unknown error'
 }
 
@@ -171,6 +175,32 @@ def check_login(f):
     def wrapped():
         if 'login' not in session:
             return -33
+        return f()
+
+    return wrapped
+
+
+def check_username(f):
+    """
+    Check if user is invalid
+    :param f:
+    :return:
+    """
+
+    @functools.wraps(f)
+    def wrapped():
+        username = session['username']
+        l = current_app.get_ldap_connection()
+        user_entries = l.search_s(current_app.ldap_search_base,
+                                  ldap.SCOPE_SUBTREE,
+                                  current_app.ldap_search_pattern.format(
+                                      username=ldap.filter.escape_filter_chars(username)))
+        if not user_entries:  # impossible?
+            current_app.logger.warn('username {} not found, fatal error.'.format(username))
+            return -33
+        if len(user_entries) > 1:  # ambiguous username. not allow to login.
+            current_app.logger.warn('ambiguous username "{}". login request is deined.'.format(username))
+            return INVALID_USER, 'Duplicated users found. The users are blocked for security reason. Consult administrator to get help.'
         return f()
 
     return wrapped
