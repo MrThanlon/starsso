@@ -34,7 +34,12 @@ LDAP_ATTR_NAME = 'sn'
 LDAP_ATTR_PERMISSION = 'permissionRoleName'
 
 # SMTP
-SMTP_HOST = 'smtp.qq.com'
-SMTP_USER = '867945543@qq.com'
-SMTP_PASS = 'kefcdpsowpgybbih'
-SMTP_SENDER = '867945543@qq.com'
+SMTP_HOST = 'smtp.mxhichina.com'
+SMTP_USER = 'service@starstudio.org'
+SMTP_PASS = '${SMTP_PASSWORD}'
+SMTP_SENDER = 'service@starstudio.org'
+SMTP_MAIL_VALIDATION_TEMPLATE = '验证码：{} ，请在5分钟内使用。'
+SMTP_MAIL_VALIDATION_SUBJECT = '星辰SSO'
+SMTP_MAIL_INVITATION_TEMPLATE = '欢迎加入星辰工作室！请点击以下链接注册您的账号。\n'\
+                                'https://starstudio.uestc.edu.cn/sso/#/register?invite={}'
+SMTP_MAIL_INVITATION_SUBJECT = '星辰SSO 邀请'

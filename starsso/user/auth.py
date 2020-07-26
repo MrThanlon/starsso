@@ -105,7 +105,10 @@ def validation_code():
     attrs = user_entry[1]
     if request.body.get('email'):
         # query email
-        if not send_email(attrs[current_app.ldap_attr_email][0].decode('utf-8'), code, username):
+        if not send_email(attrs[current_app.ldap_attr_email][0].decode('utf-8'),
+                          code, username,
+                          current_app.smtp_mail_validation_template,
+                          current_app.smtp_mail_validation_subject):
             current_app.logger.error(
                 'Failed to send email, {}, check configuration.'.format(
                     attrs[current_app.ldap_attr_email][0].decode('utf-8')))

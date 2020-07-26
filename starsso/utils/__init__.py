@@ -247,17 +247,17 @@ def send_sms(phone, code):
     return False
 
 
-def send_email(email, code, user):
+def send_email(email, code, user, template='{}', subject=''):
     receivers = [email]
-    message = MIMEText('Your validation code is {}, use it in 5m.'.format(code), 'plain', 'utf-8')
+    message = MIMEText(template.format(code), 'plain', 'utf-8')
     message['From'] = Header('StarSSO', 'utf-8')
     message['To'] = Header(user, 'utf-8')
-    message['Subject'] = Header('StarSSO Validation Code', 'utf-8')
+    message['Subject'] = Header(subject, 'utf-8')
     try:
-        smtp = smtplib.SMTP_SSL(config.SMTP_HOST, 465)
-        smtp.connect(config.SMTP_HOST, 465)
-        smtp.login(config.SMTP_USER, config.SMTP_PASS)
-        smtp.sendmail(config.SMTP_SENDER, email, message.as_string())
+        smtp = smtplib.SMTP_SSL(current_app.smtp_host, 465)
+        smtp.connect(current_app.smtp_host, 465)
+        smtp.login(current_app.smtp_user, current_app.smtp_pass)
+        smtp.sendmail(current_app.smtp_sender, email, message.as_string())
     except smtplib.SMTPException as e:
         current_app.logger.warn(e)
         return False

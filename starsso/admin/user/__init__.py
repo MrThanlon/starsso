@@ -35,7 +35,8 @@ def invite():
                       config.SECRET_KEY)
     current_app.Invite(unique_code).add()
     if email:
-        if not send_email(email, code.decode('ascii'), email):
+        if not send_email(email, code.decode('ascii'),
+                          email, current_app.smtp_mail_invitation_template, current_app.smtp_mail_invitation_subject):
             current_app.looger.error('Failed to send email, {}, check configuration.'.format(email))
             return EMAIL_FAILED
 

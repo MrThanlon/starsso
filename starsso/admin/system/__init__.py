@@ -83,9 +83,9 @@ def modify():
         for dn in dns:
             l.modify_s(dn, [(ldap.MOD_ADD, current_app.ldap_attr_permission, name_b)])
 
-    if url != None:
+    if url is not None:
         system.url = url
-    if public != None:
+    if public is not None:
         system.public = 1 if public else 0
     # FIXME: catch exception
     current_app.db.session.add(system)

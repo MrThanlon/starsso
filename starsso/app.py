@@ -159,6 +159,28 @@ def load_configuration(app):
     if not app.ldap_attr_permission:
         raise "LDAP_ATTR_PERMISSION missing."
 
+    # email
+    app.smtp_host = app.config.get('SMTP_HOST')
+    if not app.smtp_host:
+        raise "SMTP_HOST missing."
+    app.smtp_user = app.config.get('SMTP_USER')
+    if not app.smtp_user:
+        raise "SMTP_USER missing."
+    app.smtp_pass = app.config.get('SMTP_PASS')
+    if not app.smtp_host:
+        raise "SMTP_PASS missing."
+    app.smtp_sender = app.config.get('SMTP_SENDER')
+    if not app.smtp_sender:
+        raise "SMTP_SENDER missing."
+    app.smtp_mail_validation_template = app.config.get('SMTP_MAIL_VALIDATION_TEMPLATE')
+    if not app.smtp_mail_validation_template:
+        raise "SMTP_MAIL_VALIDATION_TEMPLATE' missing."
+    app.smtp_mail_validation_subject = app.config.get('SMTP_MAIL_VALIDATION_SUBJECT', 'StarSSO Validation Code')
+    app.smtp_mail_invitation_template = app.config.get('SMTP_MAIL_INVITATION_TEMPLATE')
+    if not app.smtp_mail_invitation_template:
+        raise "SMTP_MAIL_INVITATION_TEMPLATE missing."
+    app.smtp_mail_invitation_subject = app.config.get('SMTP_MAIL_INVITATION_SUBJECT', 'StarSSO Invitation')
+
     # ???? wtf
     app.response_class = APIResponse
     app.request_class = APIRequest
