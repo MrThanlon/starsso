@@ -193,6 +193,8 @@ def load_configuration(app):
     app.secret_key = app.config.get('SECRET_KEY', '')
     if not app.secret_key:
         raise "SECRET_KEY is missing."
+    # invitation token
+    app.invitation_token = app.config.get('INVITATION_TOKEN')
 
 
 def create_app():

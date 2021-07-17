@@ -13,7 +13,7 @@ import ldap
 import ldap.filter
 from email.mime.text import MIMEText
 from email.header import Header
-from flask import jsonify, Response, Request, session, current_app, Flask
+from flask import jsonify, Response, Request, session, current_app, Flask, request
 from flask.json import JSONEncoder
 from flask_sqlalchemy import SQLAlchemy
 
@@ -237,6 +237,23 @@ def check_admin(f):
             current_app.logger.warn('None-admin user request admin API, denied.'.format(username))
             return NOT_ADMIN
         return f()
+
+    return wrapped
+
+
+def check_invite_permission(f):
+    """
+    For /admin/user/invite
+    :param f:
+    :return:
+    """
+    @functools.wraps(f)
+    def wrapped():
+        token = request.body.get('token')
+        if token and token == current_app.invitation_token:
+            return f()
+        else:
+            return check_login(check_admin(f))()
 
     return wrapped
 

@@ -1,6 +1,7 @@
 from flask import Blueprint, request, current_app
 from starsso.utils import check_param, check_login, UNKNOWN_ERROR, send_sms, SMS_FAILED, DUPLICATED_USERNAME, \
-    send_email, check_admin, INVALID_USER, INVALID_REQUEST, EXISTENT_EMAIL, validate_str, EMAIL_FAILED
+    send_email, check_admin, INVALID_USER, INVALID_REQUEST, EXISTENT_EMAIL, validate_str, EMAIL_FAILED, \
+    check_invite_permission
 import ldap
 import ldap.filter
 import random
@@ -13,8 +14,7 @@ bp = Blueprint('system', __name__, url_prefix='/system')
 
 @bp.route('/invite', methods=('POST', 'GET'))
 @check_param
-@check_login
-@check_admin
+@check_invite_permission
 def invite():
     email = request.body.get('email')
     phone = request.body.get('phone')
@@ -128,11 +128,13 @@ def modify():
     if full_name is not None:
         if not validate_str([full_name]):
             return INVALID_REQUEST
-        modlist.append((ldap.MOD_REPLACE, current_app.ldap_attr_name, ldap.filter.escape_filter_chars(full_name).encode('utf-8')))
+        modlist.append(
+            (ldap.MOD_REPLACE, current_app.ldap_attr_name, ldap.filter.escape_filter_chars(full_name).encode('utf-8')))
     if phone is not None:
         if not validate_str([phone]):
             return INVALID_REQUEST
-        modlist.append((ldap.MOD_REPLACE, current_app.ldap_attr_phone, ldap.filter.escape_filter_chars(phone).encode('utf-8')))
+        modlist.append(
+            (ldap.MOD_REPLACE, current_app.ldap_attr_phone, ldap.filter.escape_filter_chars(phone).encode('utf-8')))
     if admin is not None:
         if admin is True and (b'admin' not in attrs.get(current_app.ldap_attr_permission)):
             modlist.append((ldap.MOD_ADD, current_app.ldap_attr_permission, b'admin'))

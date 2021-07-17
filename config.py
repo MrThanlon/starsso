@@ -12,6 +12,8 @@ SESSION_EXPIRATION = 864000
 INVITE_EXPIRATION = 604800
 # validation code expiration, second
 VALIDATION_EXPIRATION = 300
+# invitation token
+INVITATION_TOKEN = 'a67yu3ehw7uqyhjreu1w2'
 
 # database
 DATABASE_HOST = '10.240.0.1'
